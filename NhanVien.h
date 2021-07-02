@@ -5,7 +5,7 @@
 #include <string>
 #include <string.h>
 #include <vector>
-#include <sstream>
+#include <cstdlib>
 #include "HoaDon.h"
 #define MAX_NV 500
 #define MAX_HO 32
@@ -15,11 +15,11 @@
 using namespace std;
 //=====struct=====//
 struct NhanVien{
-	int maNV;
-	string ho;
-	string ten;
-	int phai;
-	ListHoaDon *hoaDons;
+	int maNV; //2byte
+	string ho;//32byte
+	string ten;//10byte
+	int phai;//2byte
+	DSHoaDon *hoaDons;//8byte
 };
 struct ListNhanVien{
 	int n;
@@ -33,6 +33,7 @@ ListNhanVien creatListNhanVien();
 NhanVien get(const ListNhanVien &list, int maNV);
 int indexOf(const ListNhanVien &list, int maNV);
 int add(ListNhanVien &list, NhanVien &nv);
+int add(ListNhanVien &list, NhanVien &nv, int vitri);
 int insertOrder(ListNhanVien &list, NhanVien &nv);
 int remove(ListNhanVien &list, int maNV);
 int sortmaNV(ListNhanVien &list);
@@ -41,8 +42,7 @@ int compareTen(NhanVien *nv1, NhanVien *nv2);
 string toString(NhanVien nv);
 int readFile(ListNhanVien &list, const string &filename);
 int writeFileAll(const ListNhanVien &list, const string &filename);
-//Thang nay t chua code xong
-int writeFileLine(const NhanVien &nv, const string &filename);
+ListNhanVien copyList(const ListNhanVien &list);
 //=====Ham=====//
 vector<string> split(const string& str, const string& delim){
     vector<string> tokens;
@@ -72,7 +72,7 @@ NhanVien createNhanVien(int maNV, string ho, string ten, int phai){
 	}
 	nv.ten = ten;
 	nv.phai = phai;
-	nv.hoaDons = new ListHoaDon;
+	nv.hoaDons = new DSHoaDon;
 	return nv;
 };
 NhanVien createNhanVien(string line){
@@ -82,7 +82,7 @@ NhanVien createNhanVien(string line){
 	nv.ho = v[1];
 	nv.ten = v[2];
 	nv.phai = atoi(v[3].c_str());
-	nv.hoaDons = new ListHoaDon;
+	nv.hoaDons = new DSHoaDon;
 	return nv;
 };
 ListNhanVien creatListNhanVien(){
@@ -103,6 +103,14 @@ int add(ListNhanVien &list, NhanVien &nv){
 	if(list.n==MAX_NV) return -1;
 	list.nhanViens[list.n] = new NhanVien;
 	*list.nhanViens[list.n] = nv;
+	list.n++;
+	return 1;
+};
+int add(ListNhanVien &list, NhanVien &nv, int vitri){
+	if(vitri<0||MAX_NV<vitri||list.n==MAX_NV) return -1;
+	for (int i=list.n-1; i>=vitri; i--) list.nhanViens[i+1] = list.nhanViens[i];
+	list.nhanViens[vitri] = new NhanVien;
+	*list.nhanViens[vitri] = nv;
 	list.n++;
 	return 1;
 };
@@ -163,7 +171,7 @@ int readFile(ListNhanVien &list, const string &filename){
 	int i=-1;
 	while (!feof(f))
 		fread(&list.nhanViens[++i], sizeof(NhanVien), 1, f);
-	list.n=++i;
+	list.n=i;
 	fclose(f);
 	return 1;
 };
@@ -178,6 +186,12 @@ int writeFileAll(const ListNhanVien &list, const string &filename){
 	fclose(f);
 	return 1;
 };
-int writeFileLine(const NhanVien &nv, const string &filename){
-	return -1;
+ListNhanVien copyList(const ListNhanVien &list){
+	ListNhanVien index;
+	index.n = list.n;
+	for (int i=0; i<list.n; i++){
+		index.nhanViens[i] = new NhanVien;
+		*index.nhanViens[i] = *list.nhanViens[i];
+	}
+	return index;
 };
