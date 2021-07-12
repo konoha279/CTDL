@@ -35,6 +35,11 @@ void Preorder(PTRVatTu p);
 
 void InsertVatTu(PTRVatTu &p, VatTu vt)
 {
+	if (isExistVatTu(vt.maVT, p))
+	{
+		printf("[-] San pham da ton tai!\n\n");
+		return;
+	}
 	if (p == NULL)
 	{
 		p = new NodeVatTu;
