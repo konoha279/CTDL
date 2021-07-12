@@ -1,158 +1,252 @@
 #pragma once
 #include "Date.h"
-#include <string.h>
-#include <cstdlib>
+#include <iostream>
+#include <fstream>
 #include <conio.h>
-#include <iomanip>
+#include <string>
+#include <string.h>
+#include <vector>
+#include <cstdlib>
 using namespace std;
 
 #define MAXLIST_CT 20
-#define MAX_SO_HD 20
+#define MAX_SOHD 20
 #define MAX_MAVT 10
-#define DEFAULT_CTFILE "CB.bin"
+#define MAX_NGAYLAP 11
+#define MAX_LOAI 4
+#define DEFAULT_CTFILE "HoaDon.txt"
 #define NHAP 78
 #define XUAT 88
 //=====struct=====//
-struct CT_HoaDon{
-	string soHD;
-	string maVT;
-	int soLuong;
-	int donGia;
+struct CT_HD{
+	char maVT[11];
+	int soluong;
+	int dongia;
 	float VAT;
 };
-struct ListCT_HoaDon{
-	int soVatTu = 0;
-	CT_HoaDon *ct[MAXLIST_CT];
+struct ListCT_HD{
+	int n = 0;
+	CT_HD ct[MAXLIST_CT];
 };
-struct InfoHoaDon{
-	string soHD;
+struct Info{
+	char soHD[21];
 	int maNV;
 	Date ngayLap;
 	char loai; //chi nhan gia tri 'N'hoac'X'
-	ListCT_HoaDon *listct;
+	ListCT_HD *listct;
 };
 struct hoadon{
-	InfoHoaDon info;
+	Info info;
 	hoadon *next;
 };
 typedef struct hoadon *HoaDon;
-struct DSHoaDon{
+struct ListHoaDon{
+	int n = 0;
 	HoaDon phead = NULL;
 	HoaDon ptail = NULL;
 };
 //=====Ten Ham=====//
-//=====CT_HoaDon=====//
-bool empty(ListCT_HoaDon &ds);
-bool full(ListCT_HoaDon &ds);
-int insert_CTHD(ListCT_HoaDon &ds,CT_HoaDon &ct,int i);
-int insert_CTHDTail(ListCT_HoaDon &ds,CT_HoaDon &ct);
-//con loi
-int delete_CTHD(ListCT_HoaDon &ds,string maVT);
-int readFileListCT(ListCT_HoaDon &list, const string &filename);
-int writeFileListCT(const ListCT_HoaDon &listCT, const string &filename);
-int checkSoHD(string soHD);
-int checkMaVT(string maVT);
-float doanhthu(const CT_HoaDon &ct);
-string toString(const CT_HoaDon &ct);
+vector<string> split(const string& str, const string& delim);
+//=====CT_HD=====//
+CT_HD createCT_HD(string str);
+string toString(const CT_HD &ct);
+CT_HD get(const ListCT_HD &list, char maVT[]);
+int indexOf(const ListCT_HD &list, char maVT[]);
+int compareMaVT(const CT_HD &ct1, const CT_HD &ct2);
+int add(ListCT_HD &list, const CT_HD &ct);
+int remove(ListCT_HD &list, char maVT[]);
+void swap(ListCT_HD &list, int a, int b);
 //=====HoaDon=====//
-float doanhthu(const HoaDon &hd);
+HoaDon createHoaDon(const Info &info);
+void addHead(ListHoaDon &list, const Info &info);
+void addTail(ListHoaDon &list, const Info &info);
+int removeHead(ListHoaDon &list);
+int removeTail(ListHoaDon &list);
+int remove(ListHoaDon &list, char soHD[]);
+HoaDon get(const ListHoaDon &list, char soHD[]);
+Info createInfo(string str);
+string toString(const Info &info);
+int writeFileHD(const ListHoaDon &list, const string &filename);
+int readFileHD(ListHoaDon &list, const string &filename);
+string toString(const ListHoaDon &list);
 //=====Ham=====//
-//=====CT_HoaDon=====//
-//tra ve 1 la rong,0 la ko rong
-bool empty(ListCT_HoaDon &ds){
-	return ds.soVatTu == 0;
+vector<string> split(const string& str, const string& delim){
+    vector<string> tokens;
+    size_t prev = 0, pos = 0;
+    do
+    {
+        pos = str.find(delim, prev);
+        if (pos == string::npos) pos = str.length();
+        string token = str.substr(prev, pos-prev);
+        if (!token.empty()) tokens.push_back(token);
+        prev = pos + delim.length();
+    }
+    while (pos < str.length() && prev < str.length());
+    return tokens;
 };
-//tra ve 1 la full,0 la chua full
-bool full(ListCT_HoaDon &ds){
-	return ds.soVatTu == MAXLIST_CT;
+//=====CT_HD=====//
+CT_HD createCT_HD(string str){
+	CT_HD ct; int i;
+	vector<string> v = split(str, "|");
+	strcpy(ct.maVT, v[0].c_str());
+	ct.soluong = atoi(v[1].c_str());
+	ct.dongia = atoi(v[2].c_str());
+	ct.VAT = atoi(v[3].c_str());
+	return ct;
 };
-//them 1 ct vao ds, tra ve 0 la ko them duoc, 1 la them thanh cong
-int insert_CTHD(ListCT_HoaDon &ds,CT_HoaDon &ct,int i){
-	int j;
-	if(i < 0 || i > ds.soVatTu || full(ds)) 
-		return 0;
-	for(j = ds.soVatTu - 1; j >= i; j--)
-		ds.ct[j+1] = ds.ct[j];
-	ds.ct[i] = &ct;
-	ds.soVatTu++;
-	return 1; 
+string toString(const CT_HD &ct){
+	return string(ct.maVT) + "|" + to_string(ct.soluong) + "|" + to_string(ct.dongia) + "|" + to_string(ct.VAT);
 };
-//them 1 ct vao cuoi ds, tra ve 0 la ko them duoc, 1 la them thanh cong
-int insert_CTHDTail(ListCT_HoaDon &ds,CT_HoaDon &ct){
-	int j;
-	if(full(ds)) 
-		return 0;
-	if(empty(ds)){
-		ds.ct[0] = &ct;
-		ds.soVatTu++;
-		return 1;
-	}
-	//vòng này làm gì vay?
-	for(j = 0; j < ds.soVatTu; j++);
-	ds.ct[j] = &ct;
-	ds.soVatTu++;
+CT_HD get(const ListCT_HD &list, char maVT[]){
+	for (int i=0; i<list.n; i++)
+		if(!strcmp(list.ct[i].maVT, maVT)) return list.ct[i];
+};
+int indexOf(const ListCT_HD &list, char maVT[]){
+	for (int i=0; i<list.n; i++)
+		if(!strcmp(list.ct[i].maVT, maVT)) return i;
+	return -1;
+};
+int compareMaVT(const CT_HD &ct1, const CT_HD &ct2){
+	return strcmp(ct1.maVT, ct2.maVT);
+};
+int add(ListCT_HD &list, const CT_HD &ct){
+	if(list.n == MAXLIST_CT) return 0;
+	int i, j;
+	for (i=0; i<list.n && compareMaVT(list.ct[i], ct)<0; i++);
+	for (j=list.n; j>i; j--) list.ct[j] = list.ct[j-1];
+	list.ct[i] = ct;
+	list.n++;
 	return 1;
 };
-//xoa 1 ct trong ListCT_HoaDon, ham nay chua KT viec ds nay da duoc luu hay chua
-//ham nay co loi
-int delete_CTHD(ListCT_HoaDon &ds,string maVT){
-	int i;
-	if(ds.soVatTu == 0)
-		return 0;
-	for(i = 0; i < ds.soVatTu || ds.ct[i]->maVT.compare(maVT) == 0; i++);
-	for(int j = i+1;  j < ds.soVatTu ; j++)
-		ds.ct[j-1] = ds.ct[j];
-	ds.soVatTu--;
-	return 1;		
-};
-//ghi vao file 1 ListCT_HoaDon, tra ve 0 la loi, 1 la ghi thanh cong 
-int writeFileListCT(const ListCT_HoaDon &listCT, const string &filename){
-	FILE *fptr;
-	if ((fptr = fopen(filename.c_str(),"wb")) == NULL) return 0;
-	fwrite(&listCT.soVatTu, sizeof(int), 1, fptr);
-	for(int i =0; i < listCT.soVatTu; i++){
-		fwrite("\n", sizeof(char), 1, fptr);
-		fwrite(&listCT.ct[i], sizeof(CT_HoaDon), 1, fptr);
-	}
-	fclose(fptr);
+int remove(ListCT_HD &list, char maVT[]){
+	if(list.n==0) return 0;
+	int i = indexOf(list, maVT);
+	if(i==-1) return 0;
+	for(int j=i+1; j<list.n; j++) list.ct[j-1] = list.ct[j];
+	list.n--;
 	return 1;
 };
-//doc file ListCT_HoaDon va tra ve 1 ListCT_HoaDon 
-int readFileListCT(ListCT_HoaDon &list, const string &filename){
-	int soLuong;
-	char temp;
-	FILE *fptr;
-	if ((fptr = fopen(filename.c_str(),"rb")) == NULL) return 0;
-	fread(&soLuong, sizeof(int), 1, fptr);
-	for(int i = 0; i < soLuong; i++){
-		fread(&temp, sizeof(char), 1, fptr);
-		fread(&list.ct[i], sizeof(CT_HoaDon), 1, fptr);
+void swap(ListCT_HD &list, int a, int b){
+	CT_HD temp = list.ct[a];
+	list.ct[a] = list.ct[b];
+	list.ct[b] = temp;
+};
+//=====Hoa Don=====//
+HoaDon createHoaDon(const Info &info){
+	HoaDon hd = new hoadon;
+	hd->info = info;
+	hd->next = NULL;
+	return hd;
+};
+void addHead(ListHoaDon &list, const Info &info){
+	HoaDon temp = createHoaDon(info);
+	if(list.phead==NULL){
+		list.phead = temp;
+		list.ptail = temp;
+		list.n++;
+		return;
 	}
-	fclose(fptr);
-	list.soVatTu = soLuong;
+	temp->next = list.phead;
+	list.phead = temp;
+	list.n++;
+	return;
+};
+void addTail(ListHoaDon &list, const Info &info){
+	HoaDon temp = createHoaDon(info);
+	if(list.phead==NULL){
+		list.phead = temp;
+		list.ptail = temp;
+		list.n++;
+		return;
+	}
+	list.ptail->next = temp;
+	list.ptail = temp;
+	list.n++;
+	return;
+};
+int removeHead(ListHoaDon &list){
+	if (list.n==0) return 0;
+	HoaDon temp = list.phead;
+	list.phead = list.phead->next;
+	delete temp;
+	list.n--;
 	return 1;
 };
-//tra 1 la soHD dat gioi han do dai, 0 la chua
-int checkSoHD(string soHD){
-	return soHD.length() == MAX_SO_HD;
+int removeTail(ListHoaDon &list){
+	if (list.n==0) return 0;
+	HoaDon temp = list.ptail, p = list.phead;
+	while (p->next!=temp) p=p->next;
+	list.ptail = p;
+	delete temp;
+	list.n--;
+	return 1;
 };
-//tra 1 la MaVT dat gioi han do dai, 0 la chua
-int checkMaVT(string maVT){
-	return maVT.length() == MAX_MAVT;
+int remove(ListHoaDon &list, char soHD[]){
+	HoaDon p = list.phead, q=list.ptail;
+	if(!strcmp(p->info.soHD, soHD)) return removeHead(list);
+	if(!strcmp(q->info.soHD, soHD)) return removeTail(list);
+	while(p->next!=q && strcmp(p->next->info.soHD, soHD)) p=p->next;
+	if (p->next==q) return 0;
+	q = p->next;
+	p->next = q->next;
+	delete q;
+	list.n--;
+	return 1;
 };
-float doanhthu(const CT_HoaDon &ct){
-	return (100 - ct.VAT)/100 * ct.donGia * (float) ct.soLuong;
+HoaDon get(const ListHoaDon &list, char soHD[]){
+	if(list.n==0) return NULL;
+	for (HoaDon p = list.phead; p!=NULL; p=p->next)
+		if(!strcmp(p->info.soHD, soHD)) return p;
+	return NULL;
 };
-float doanhthu(const HoaDon &hd){
-	if(hd->info.loai==NHAP) return -1;
-	float dt = 0;
-	ListCT_HoaDon* listct = hd->info.listct;
-	for (int i=0; i<listct->soVatTu; i++)
-		dt += doanhthu(*listct->ct[i]);
-	return dt;
+Info createInfo(string str){
+	vector<string> v = split(str,"|");
+	Info info;
+	strcpy(info.soHD, v[0].c_str());
+	info.maNV = atoi(v[1].c_str());
+	info.ngayLap = convertStringToDate(v[2]);
+	info.loai = v[3][0];
+	info.listct = new ListCT_HD;
+	info.listct->n = atoi(v[4].c_str());
+	return info;
 };
-string toString(const CT_HoaDon &ct){
-	return ct.soHD + "|" + ct.maVT + "|" + to_string((int)ct.donGia) + "|" + 
-		to_string((int)ct.VAT) + "|" + to_string((int) ct.soLuong) + "|" + to_string((int)doanhthu(ct));
+string toString(const Info &info){
+	return string(info.soHD) + "|" + to_string(info.maNV) + "|" + convertDateToString(info.ngayLap) + "|"
+		+ info.loai + "|" + to_string(info.listct->n);
 };
-//=====HoaDon=====//
+int writeFileHD(const ListHoaDon &list, const string &filename){
+	fstream f;
+	f.open(filename);
+	if(f.fail()) return 0;
+	f<<toString(list);
+	f.close();
+	return 1;
+};
+int readFileHD(ListHoaDon &list, const string &filename){
+	fstream f;
+	f.open(filename);
+	if(f.fail()) return 0;
+	Info info;
+	string str;
+	while(!f.eof()){
+		getline(f, str);
+		if(str.length()<5) break;
+		info = createInfo(str);
+		for (int i=0; i<info.listct->n; i++){
+			getline(f,str);
+			info.listct->ct[i] = createCT_HD(str);
+		}
+		addTail(list, info);
+	}
+	f.close();
+	return 1;
+};
+string toString(const ListHoaDon &list){
+	string str="";
+	for (HoaDon hd = list.phead; hd!=NULL; hd=hd->next){
+		str += toString(hd->info) + "\n";
+		for (int i=0; i<hd->info.listct->n; i++)
+			str += toString(hd->info.listct->ct[i]) + "\n";
+	}
+	return str;
+};

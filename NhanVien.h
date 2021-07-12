@@ -19,60 +19,39 @@ struct NhanVien{
 	string ho;//32byte
 	string ten;//10byte
 	int phai;//2byte
-	DSHoaDon *hoaDons;//8byte
+	ListHoaDon *hoaDons;//8byte
 };
 struct ListNhanVien{
-	int n;
+	int n = 0;
 	NhanVien *nhanViens[MAX_NV];
 };
 //=====Ten Ham=====//
-vector<string> split(const string& str, const string& delim);
 NhanVien createNhanVien(int maNV, string ho, string ten, int phai);
 NhanVien createNhanVien(string line);
-ListNhanVien creatListNhanVien();
 NhanVien get(const ListNhanVien &list, int maNV);
 int indexOf(const ListNhanVien &list, int maNV);
 int add(ListNhanVien &list, NhanVien &nv);
 int add(ListNhanVien &list, NhanVien &nv, int vitri);
 int insertOrder(ListNhanVien &list, NhanVien &nv);
 int remove(ListNhanVien &list, int maNV);
-int sortmaNV(ListNhanVien &list);
-int sortTen(ListNhanVien &list);
 int compareTen(NhanVien *nv1, NhanVien *nv2);
 string toString(NhanVien nv);
-int readFile(ListNhanVien &list, const string &filename);
-int writeFileAll(const ListNhanVien &list, const string &filename);
+int readFileNV(ListNhanVien &list, const string &filename);
+int writeFileNV(const ListNhanVien &list, const string &filename);
 ListNhanVien copyList(const ListNhanVien &list);
+ListNhanVien search(const ListNhanVien &list, const string &delim);
+int partitionmaNV(ListNhanVien &list, int low, int high);
+int partitiontenNV(ListNhanVien &list, int low, int high);
+void quicksort(ListNhanVien &list, int low, int high, int chedo);
+void swap(ListNhanVien &list, int a, int b);
 //=====Ham=====//
-vector<string> split(const string& str, const string& delim){
-    vector<string> tokens;
-    size_t prev = 0, pos = 0;
-    do
-    {
-        pos = str.find(delim, prev);
-        if (pos == string::npos) pos = str.length();
-        string token = str.substr(prev, pos-prev);
-        if (!token.empty()) tokens.push_back(token);
-        prev = pos + delim.length();
-    }
-    while (pos < str.length() && prev < str.length());
-    return tokens;
-}
 NhanVien createNhanVien(int maNV, string ho, string ten, int phai){
 	NhanVien nv;
 	nv.maNV = maNV;
-	for (int i=0; i<32; i++){
-		if(i<ho.length()) ho[i] = toupper(ho[i]);
-		else ho+= " ";
-	}
 	nv.ho = ho;
-	for (int i=0; i<10; i++){
-		if(i<ten.length()) ten[i] = toupper(ten[i]);
-		else ten+= " ";
-	}
 	nv.ten = ten;
 	nv.phai = phai;
-	nv.hoaDons = new DSHoaDon;
+	nv.hoaDons = new ListHoaDon;
 	return nv;
 };
 NhanVien createNhanVien(string line){
@@ -82,13 +61,8 @@ NhanVien createNhanVien(string line){
 	nv.ho = v[1];
 	nv.ten = v[2];
 	nv.phai = atoi(v[3].c_str());
-	nv.hoaDons = new DSHoaDon;
+	nv.hoaDons = new ListHoaDon;
 	return nv;
-};
-ListNhanVien creatListNhanVien(){
-	ListNhanVien list;
-	list.n = 0;
-	return list;
 };
 NhanVien get(const ListNhanVien &list, int maNV){
 	for (int i=0; i<list.n; i++)
@@ -132,58 +106,34 @@ int remove(ListNhanVien &list, int maNV){
 	list.n--;
 	return 1;
 };
-int sortmaNV(ListNhanVien &list){
-	for (int i=0; i<list.n-1; i++){
-		int min = i;
-		for (int j=i+1; j<list.n; j++){
-			if(list.nhanViens[min]->maNV>list.nhanViens[j]->maNV) min=j;
-		}
-		NhanVien* temp = list.nhanViens[i];
-		list.nhanViens[i] = list.nhanViens[min];
-		list.nhanViens[min] = temp;
-	}
-};
 int compareTen(NhanVien *nv1, NhanVien *nv2){
-	if(strcmp(nv1->ten.c_str(), nv2->ten.c_str())!=0) return strcmp(nv1->ten.c_str(), nv2->ten.c_str());
-	return strcmp(nv1->ho.c_str(), nv2->ho.c_str());
-};
-int sortTen(ListNhanVien &list){
-	for (int i=0; i<list.n-1; i++){
-		int min = i;
-		for (int j=i+1; j<list.n; j++){
-			if(compareTen(list.nhanViens[min],list.nhanViens[j])>0) min=j;
-		}
-		NhanVien* temp = list.nhanViens[i];
-		list.nhanViens[i] = list.nhanViens[min];
-		list.nhanViens[min] = temp;
-	}
+	string tennv1 = nv1->ten + nv1->ho;
+	string tennv2 = nv2->ten + nv2->ho;
+	return strcmp(tennv1.c_str(), tennv2.c_str());
 };
 string toString(NhanVien nv){
 	string str = to_string(nv.maNV) + "|" + nv.ho + "|" + nv.ten + "|" + to_string(nv.phai) + "|";
 	return str;
 };
-int readFile(ListNhanVien &list, const string &filename){
-	FILE *f;
-	if ((f=fopen(filename.c_str(), "rb"))==NULL) {
-		fclose(f);
-		return -1;
+int readFileNV(ListNhanVien &list, const string &filename){
+	fstream f;
+	f.open(DEFAULT_NVFILE);
+	if(f.bad()||f.fail()) return 0;
+	string str;
+	while(!f.eof()){
+		getline(f, str);
+		if(str.length()<5) break;
+		NhanVien nv = createNhanVien(str);
+		add(list, nv);
 	}
-	int i=-1;
-	while (!feof(f))
-		fread(&list.nhanViens[++i], sizeof(NhanVien), 1, f);
-	list.n=i;
-	fclose(f);
 	return 1;
 };
-int writeFileAll(const ListNhanVien &list, const string &filename){
-	FILE *f; 
-	if ((f=fopen(filename.c_str(), "wb"))==NULL) {
-		fclose(f);
-		return -1;	
-	}
+int writeFileNV(const ListNhanVien &list, const string &filename){
+	fstream f;
+	f.open(DEFAULT_NVFILE);
+	if(f.fail()) return -1;
 	for (int i=0; i<list.n; i++)
-		fwrite(&list.nhanViens[i], sizeof(NhanVien),1, f);
-	fclose(f);
+		f<<toString(*list.nhanViens[i])<<endl;
 	return 1;
 };
 ListNhanVien copyList(const ListNhanVien &list){
@@ -194,4 +144,57 @@ ListNhanVien copyList(const ListNhanVien &list){
 		*index.nhanViens[i] = *list.nhanViens[i];
 	}
 	return index;
+};
+ListNhanVien search(const ListNhanVien &list, const string &delim){
+	ListNhanVien list2;
+	list2.n = 0;
+	string str;
+	for (int i=0; i<list.n; i++){
+		str = toString(*list.nhanViens[i]);
+		vector<string> v = split(str, delim);
+		if(v[0].size() < str.size()) add(list2, *list.nhanViens[i]);
+	}
+	return list2;
+};
+void swap(ListNhanVien &list, int a, int b){
+	NhanVien temp = *list.nhanViens[a];
+	*list.nhanViens[a] = *list.nhanViens[b];
+	*list.nhanViens[b] = temp;
+};
+int partitionmaNV(ListNhanVien &list, int low, int high){
+	//chon pivot la phan tu cuoi phai
+	int pivotmaNV = list.nhanViens[high]->maNV;
+	int left = low, right = high-1;
+	while (true){
+		while(left<=right && list.nhanViens[left]->maNV<pivotmaNV) left++;
+		while(right>=left && list.nhanViens[right]->maNV>pivotmaNV) right--;
+		if (left>=right) break;
+		swap(list, left, right);
+		left++; right--;
+	}
+	swap(list, left, high);
+	return left;
+};
+int partitiontenNV(ListNhanVien &list, int low, int high){
+	NhanVien* pivot = list.nhanViens[high];
+	int left = low, right = high-1;
+	while (true){
+		while (left<=right && compareTen(list.nhanViens[left], pivot)<0) left++;
+		while (right>=left && compareTen(list.nhanViens[right], pivot)>0) right--;
+		if(left>=right) break;
+		swap(list, left, right);
+		left++; right--;
+	}
+	swap(list, left, high);
+	return left;
+};
+void quicksort(ListNhanVien &list, int low, int high, int chedo){
+	if(low<high){
+		//pi là phan tu da dung dung vi tri, chia mang ra lam 2 mang con trai phai
+		int pi;
+		if (chedo==1) pi = partitiontenNV(list, low, high);
+		else pi = partitionmaNV(list, low, high);
+		quicksort(list, low, pi-1, chedo);
+		quicksort(list, pi+1, high, chedo);
+	}
 };

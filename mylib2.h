@@ -3,8 +3,10 @@
 #include <Shlwapi.h>
 #include <Windows.h>
 #include <conio.h>
+#include <string>
 #include "Marcro.h"
-
+#include <iomanip>
+using namespace std;
 HANDLE hConsoleOutput;
 HANDLE hConsoleInput;
 
@@ -33,11 +35,10 @@ void normalBGColor();
 char getCursorChar();    
 /// Function which reads character at specific coordinates
 char readChar(int x, int y); 
+// tao o hinh chu nhat thay doi theo chieu dai text truyen vao
+void CreateBox(int x, int y, string text, int length);
 
-
-
-void resizeConsole(int width, int height)
-{
+void resizeConsole(int width, int height){
 	HWND console = GetConsoleWindow();
 	RECT r;
 	GetWindowRect(console, &r);
@@ -56,16 +57,14 @@ void resizeConsole(int width, int height)
 	SetConsoleScreenBufferSize(hConsoleOutput, crd);
 }
 
-int wherex(void)
-{
+int wherex(void){
 	hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_SCREEN_BUFFER_INFO screen_buffer_info;
 	GetConsoleScreenBufferInfo(hConsoleOutput, &screen_buffer_info);
 	return screen_buffer_info.dwCursorPosition.X;
 }
 
-int wherey(void)
-{
+int wherey(void){
 	hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_SCREEN_BUFFER_INFO screen_buffer_info;
 	GetConsoleScreenBufferInfo(hConsoleOutput, &screen_buffer_info);
@@ -73,24 +72,21 @@ int wherey(void)
 }
 
 // HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
-void gotoxy(int x, int y)
-{
+void gotoxy(int x, int y){
 	COORD coord;
 	coord.X = x;
 	coord.Y = y;
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
-void Cursor(BOOL bVisible, DWORD dwSize)
-{
+void Cursor(BOOL bVisible, DWORD dwSize){
 	CONSOLE_CURSOR_INFO ConsoleCursorInfo;
 	ConsoleCursorInfo.bVisible = bVisible;
 	ConsoleCursorInfo.dwSize = dwSize; // Phan tram bao trum o cua con tro chuot
 	SetConsoleCursorInfo(hConsoleOutput, &ConsoleCursorInfo);
 }
 
-void SetColor(WORD color)
-{
+void SetColor(WORD color){
 	HANDLE hConsoleOutput;
 	hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_SCREEN_BUFFER_INFO screen_buffer_info;
@@ -104,8 +100,7 @@ void SetColor(WORD color)
 	SetConsoleTextAttribute(hConsoleOutput, wAttributes);
 }
 
-void SetBGColor(WORD color)
-{
+void SetBGColor(WORD color){
 	HANDLE hConsoleOutput;
 	hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -121,8 +116,7 @@ void SetBGColor(WORD color)
 	SetConsoleTextAttribute(hConsoleOutput, wAttributes);
 }
 
-void cls(HANDLE hConsole)
-{
+void cls(HANDLE hConsole){
 	COORD coordScreen = { 0, 0 };    // home for the cursor 
 	DWORD cCharsWritten;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -153,37 +147,21 @@ void cls(HANDLE hConsole)
 	SetConsoleCursorPosition(hConsole, coordScreen);
 }
 
-void clrscr()
-{
-	CONSOLE_SCREEN_BUFFER_INFO screen_buffer_info;
-	COORD Home = { 0, 0 };
-	DWORD dummy;
-
-	hConsoleOutput = GetStdHandle(STD_INPUT_HANDLE);
-	GetConsoleScreenBufferInfo(hConsoleOutput, &screen_buffer_info);
-
-	FillConsoleOutputCharacter(hConsoleOutput, ' ', screen_buffer_info.dwSize.X * screen_buffer_info.dwSize.Y, Home, &dummy);
-	screen_buffer_info.dwCursorPosition.X = 0;
-	screen_buffer_info.dwCursorPosition.Y = 0;
-	SetConsoleCursorPosition(hConsoleOutput, screen_buffer_info.dwCursorPosition);
+void clrscr(){
+	HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
+	cls(hCon);
 }
-
-//bool GetKey(int key)
-//{
-//	return GetAsyncKeyState(key);
-//}
 
 void normalTextColor() {
 	SetColor(WHITE);
 }
 
-void normalBGColor()
-{
+void normalBGColor(){
 	SetColor(WHITE);
 }
 
-char getCursorChar()    /// Function which returns character on console's cursor position 
-{
+char getCursorChar(){    /// Function which returns character on console's cursor position 
+
 	char c = '\0';
 	CONSOLE_SCREEN_BUFFER_INFO con;
 	HANDLE hcon = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -198,10 +176,17 @@ char getCursorChar()    /// Function which returns character on console's cursor
 	}
 	return c;
 }
-
-char readChar(int x, int y)  /// Function which reads character at specific coordinates
-{
+char readChar(int x, int y){  /// Function which reads character at specific coordinates{
 	gotoxy(x, y);
 	char ccccc = getCursorChar();
 	return ccccc;
+}
+void CreateBox(int x, int y, string text, int length){
+	if(x<0||y<1) return;
+	gotoxy(x, y - 1);
+	cout << char(201) << setw(length) << setfill(char(205)) << char(205) << char(187);
+	gotoxy(x, y);
+	cout << char(186) << text << setw(length - text.length() + 1) << setfill(' ') << char(186);
+	gotoxy(x, y + 1);
+	cout << char(200) << setw(length) << setfill(char(205)) << char(205) << char(188);
 }
