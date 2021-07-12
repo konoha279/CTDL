@@ -151,3 +151,34 @@ void InorderVatTu(PTRVatTu p)
 		InorderVatTu(p->right);
 	}
 }
+
+void InChiTiet(PTRVatTu p, FILE *f)
+{
+	if (p != NULL)
+	{
+		InChiTiet(p->left, f);
+		fwrite(&p->vatTu, sizeof(struct VatTu), 1, f);
+		
+		InChiTiet(p->right, f);
+	}
+}
+
+void InFile(PTRVatTu Head)
+{
+	FILE *f = fopen("vattu.dat", "wb");
+	InChiTiet(Head,f);
+	fclose(f);	
+}
+
+void ReadFile(PTRVatTu &Head)
+{
+	FILE *f;
+	f = fopen("vattu.dat", "rb");
+	VatTu vt;
+	while (!feof(f))
+	{
+		fread(&vt, sizeof(struct VatTu), 1, f);
+		InsertVatTu(Head, vt);
+	}
+	fclose(f);
+}
