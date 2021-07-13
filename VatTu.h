@@ -7,7 +7,8 @@
 #define MAX_NV 500
 #define MAX_HO 32
 #define MAX_TEN 10
-
+#define MAX_LIST 10000
+int sizeVatTu = 0;
 struct VatTu
 {
 	char maVT[10];
@@ -22,11 +23,17 @@ struct NodeVatTu
 	NodeVatTu *left;
 	NodeVatTu *right;
 };
+
 typedef NodeVatTu* PTRVatTu;
+
+struct mangVatTu
+{
+	int n =0;
+	PTRVatTu arr[MAX_LIST];
+};
 
 void InsertVatTu(PTRVatTu &p, VatTu vt);
 int SoSanhVatTu(VatTu vt1, VatTu vt2);
-void CreateTree(PTRVatTu &root);
 void remove_case_3(PTRVatTu &r);
 void remove(VatTu vt, PTRVatTu &p);
 PTRVatTu Search(PTRVatTu root, VatTu vt);
@@ -77,12 +84,6 @@ int SoSanhVatTu(VatTu vt1, VatTu vt2)
 		else return strcmp(vt1.tenVT, vt2.tenVT);
 	}
 	else return strcmp(vt1.maVT, vt2.maVT);
-}
-
-void CreateTree(PTRVatTu &root)
-{
-
-
 }
 
 void remove_case_3(PTRVatTu &r)
@@ -151,7 +152,7 @@ void InorderVatTu(PTRVatTu p)
 	if (p != NULL)
 	{
 		InorderVatTu(p->left);
-		printf(" %5s | %50s | %5s | %d \n", p->vatTu.maVT, p->vatTu.tenVT, p->vatTu.dvt, p->vatTu.soLuongTon);
+		printf(" %5s | %-50s | %-5s | %d \n", p->vatTu.maVT, p->vatTu.tenVT, p->vatTu.dvt, p->vatTu.soLuongTon);
 		
 		InorderVatTu(p->right);
 	}
@@ -184,6 +185,13 @@ void ReadFile(PTRVatTu &Head)
 	{
 		fread(&vt, sizeof(struct VatTu), 1, f);
 		InsertVatTu(Head, vt);
+		sizeVatTu++;
 	}
 	fclose(f);
+}
+
+void add(mangVatTu arr, PTRVatTu p)
+{
+	arr.arr[arr.n] = p;
+	arr.n++;
 }
