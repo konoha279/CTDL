@@ -44,7 +44,6 @@ int partitionmaNV(ListNhanVien &list, int low, int high);
 int partitiontenNV(ListNhanVien &list, int low, int high);
 void quicksort(ListNhanVien &list, int low, int high, int chedo);
 void swap(ListNhanVien &list, int a, int b);
-int getListHoaDon(const ListHoaDon &list, NhanVien nv);
 //=====Ham=====//
 NhanVien createNhanVien(int maNV, string ho, string ten, int phai){
 	NhanVien nv;
@@ -63,6 +62,7 @@ NhanVien createNhanVien(string line){
 	nv.ten = v[2];
 	nv.phai = atoi(v[3].c_str());
 	nv.hoaDons = new ListHoaDon;
+	nv.hoaDons->n = atoi(v[4].c_str());
 	return nv;
 };
 NhanVien get(const ListNhanVien &list, int maNV){
@@ -112,30 +112,47 @@ int compareTen(NhanVien *nv1, NhanVien *nv2){
 	return strcmp(tennv1.c_str(), tennv2.c_str());
 };
 string toString(NhanVien nv){
-	string str = to_string(nv.maNV) + "|" + nv.ho + "|" + nv.ten + "|" + to_string(nv.phai) + "|";
+	string str = to_string(nv.maNV) + "|" + nv.ho + "|" + nv.ten + "|" + to_string(nv.phai) + "|" + to_string(nv.hoaDons->n);
 	return str;
 };
 int readFileNV(ListNhanVien &list, const string &filename){
 	fstream f;
-	f.open(DEFAULT_NVFILE);
+	f.open(filename);
 	if(f.bad()||f.fail()) return 0;
 	string str;
+	NhanVien nv;
+	Info info;
 	while(!f.eof()){
 		getline(f, str);
 		if(str.length()<5) break;
-		NhanVien nv = createNhanVien(str);
+		//Tao nhan vien
+		nv = createNhanVien(str);
+		//Them listhoadon
+		for (int i=0; i<nv.hoaDons->n; i++){
+			getline(f, str);
+			info = createInfo(str);
+			for (int j=0; j<info.listct->n; j++){
+				getline(f, str);
+				info.listct->ct[j] = createCT_HD(str);
+			}
+			addTail(*nv.hoaDons, info);
+			nv.hoaDons->n--;
+		}
 		add(list, nv);
 	}
 	return 1;
 };
 int writeFileNV(const ListNhanVien &list, const string &filename){
 	fstream f;
-	f.open(DEFAULT_NVFILE);
+	f.open(filename);
 	if(f.fail()) return -1;
-	for (int i=0; i<list.n; i++)
+	for (int i=0; i<list.n; i++){
 		f<<toString(*list.nhanViens[i])<<endl;
+		f<<toString(*list.nhanViens[i]->hoaDons);
+	}
 	return 1;
 };
+
 ListNhanVien copyList(const ListNhanVien &list){
 	ListNhanVien index;
 	index.n = list.n;
@@ -197,9 +214,4 @@ void quicksort(ListNhanVien &list, int low, int high, int chedo){
 		quicksort(list, low, pi-1, chedo);
 		quicksort(list, pi+1, high, chedo);
 	}
-};
-int getListHoaDon(const ListHoaDon &list, NhanVien nv){
-	if(list.n==0) return 0;
-	for (HoaDon p = list.phead; p!=NULL; p++)
-		if(p->info.maNV==nv.maNV) addTail(*nv.hoaDons, p->info);
 };

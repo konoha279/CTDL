@@ -30,7 +30,6 @@ struct ListCT_HD{
 };
 struct Info{
 	char soHD[21];
-	int maNV;
 	Date ngayLap;
 	char loai; //chi nhan gia tri 'N'hoac'X'
 	ListCT_HD *listct;
@@ -66,8 +65,6 @@ int remove(ListHoaDon &list, char soHD[]);
 HoaDon get(const ListHoaDon &list, char soHD[]);
 Info createInfo(string str);
 string toString(const Info &info);
-int writeFileHD(const ListHoaDon &list, const string &filename);
-int readFileHD(ListHoaDon &list, const string &filename);
 string toString(const ListHoaDon &list);
 //=====Ham=====//
 vector<string> split(const string& str, const string& delim){
@@ -203,43 +200,15 @@ Info createInfo(string str){
 	vector<string> v = split(str,"|");
 	Info info;
 	strcpy(info.soHD, v[0].c_str());
-	info.maNV = atoi(v[1].c_str());
-	info.ngayLap = convertStringToDate(v[2]);
-	info.loai = v[3][0];
+	info.ngayLap = convertStringToDate(v[1]);
+	info.loai = v[2][0];
 	info.listct = new ListCT_HD;
-	info.listct->n = atoi(v[4].c_str());
+	info.listct->n = atoi(v[3].c_str());
 	return info;
 };
 string toString(const Info &info){
-	return string(info.soHD) + "|" + to_string(info.maNV) + "|" + convertDateToString(info.ngayLap) + "|"
+	return string(info.soHD) + "|" + convertDateToString(info.ngayLap) + "|"
 		+ info.loai + "|" + to_string(info.listct->n);
-};
-int writeFileHD(const ListHoaDon &list, const string &filename){
-	fstream f;
-	f.open(filename);
-	if(f.fail()) return 0;
-	f<<toString(list);
-	f.close();
-	return 1;
-};
-int readFileHD(ListHoaDon &list, const string &filename){
-	fstream f;
-	f.open(filename);
-	if(f.fail()) return 0;
-	Info info;
-	string str;
-	while(!f.eof()){
-		getline(f, str);
-		if(str.length()<5) break;
-		info = createInfo(str);
-		for (int i=0; i<info.listct->n; i++){
-			getline(f,str);
-			info.listct->ct[i] = createCT_HD(str);
-		}
-		addTail(list, info);
-	}
-	f.close();
-	return 1;
 };
 string toString(const ListHoaDon &list){
 	string str="";
