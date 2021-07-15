@@ -1,151 +1,53 @@
 #pragma once
 
 //constant
-#define MAX  100
-
+#define MAXLINE 166
+#define MAXROW 45
 // Cac HotKey
-// Quay con tro ve 1 don vi char
+#define CTRL_A 1
+#define CTRL_F 6
+#define CTRL_N 14
+#define CTRL_S 19
 #define BACKSPACE 8
-// OK
-#define ENTER 13
-// thoat truc tiep va ve Menu chinh
-#define ESC  27
-// Di len
-#define KEY_UP 72
-// Di xuong
-#define KEY_DOWN 80
-// Di qua trai
-#define KEY_LEFT 75
-// Di qua phai 
-#define KEY_RIGHT 77
-// Dau
-#define KEY_F1 59
-// Truoc
-#define KEY_F2 60
-// Sau
-#define KEY_F3 61
-// Cuoi
-#define KEY_F4 62
-// Sua thong tin
-#define KEY_F10 68
-// Them
-#define KEY_F11 69
-//Xoa
-#define KEY_F12 70
-// Cuon page xuong duoi
-#define PAGE_DOWN 81
-// Cuon page len tren
-#define PAGE_UP 73
-// Khoang trang
-#define SPACE  32
-//  Tim kiem
-#define KEY_F9 67
-
-// Tro ve
 #define TAB 9
-
+#define ENTER 13
+#define ESC  27
+#define SPACE 32
+#define KEY_F1 59
+#define KEY_F2 60
+#define KEY_F3 61
+#define KEY_F4 62
+#define KEY_F9 67
+#define KEY_F10 68
+#define KEY_F11 69
+#define KEY_F12 70
+#define KEY_UP 72
+#define PAGE_UP 73
+#define KEY_LEFT 75
+#define KEY_RIGHT 77
+#define KEY_DOWN 80
+#define PAGE_DOWN 81
+#define LEFT_CLICK 0x5A
+#define RIGHT_CLICK 0x58
 // thay unsigned int thanh uint
 typedef unsigned int uint;
-
 // ma mau
-#define AQUA 3
-#define PURPLE 5
-#define LIGHT_AQUA 11
-#define LIGHT_YELLOW 14
-#define LIGHT_GREEN 10 
 #define BLACK 0
-#define WHITE 7
-#define GREEN 2
-#define BRIGHT_WHITE 15
 #define BLUE 1
+#define GREEN 2
+#define AQUA 3
+#define RED 4
+#define PURPLE 5
+#define YELLOW 6
+#define WHITE 7
+#define SILVER 8
+#define LIGHT_BLUE 9
+#define LIGHT_GREEN 10
+#define LIGHT_AQUA 11
 #define LIGHT_RED 12
-
-
+#define LIGHT_PURPLE 13
+#define LIGHT_YELLOW 14
+#define BRIGHT_WHITE 15
 // size man hinh
-#define GWIDTH 1100
-#define GHEIGHT 650
-
-// vi tri in ten, mssv, lop
-//#define xTen 53
-//#define yTen 22
-
-// vitri khung loading
-//#define xLoading 15
-//#define yLoading 33
-
-
-// vi tri menu chinh
-//#define xMainMenu 10
-//#define yMainMenu 12
-
-// vi tri dong chu chay
-//#define xChuChay 45
-//#define yChuChay 30
-
-//toa do max
-//#define xMax 132
-//#define yMax 35
-
-//goc toa do
-//#define xOrdinal 0
-//#define yOrdinal 0
-
-// Max Ma doc gia
-//#define Max_MADG 99999
-// Min Ma doc Gia
-//#define Min_MADG 0
-
-// toa do x cua SubMainMenus
-//#define xSubMainMenus1 40
-//#define xSubMainMenus2 52
-//#define xSubMainMenus3 52
-
-
-// toa do y cua  bang hien thi
-//#define yDisplay 2
-
-//#define yDisplayMT 18
-
-//#define yDisplayTop10 5
-
-// toa do t cua cac hoat key F2, F3, F4, F10
-//#define yHotkey 35
-
-// vi tri Tieu de 
-//#define xTitle 97
-//#define yTitle 5
-
-// chieu dai dai nhat cua ten
-//#define MAX_TEN 7
-
-// chieu dai dai nhat cua ho 
-//#define MAX_HO 16
-
-//chieu dai dai nhat cua ten sach
-//#define MAX_TENSACH 24
-
-// chieu dai dai nhat cua ten tac gia
-//#define MAX_TENTG 17
-
-// chieu dai dai nhat cua ISBN
-//#define MAX_ISBN 4
-
-// chieu dai dai nhat cua the loai sach
-//#define MAX_THELOAISACH 11
-
-// the de nhap trang thai va nhap phai
-//#define NHAP_TRANG_THAI 1
-//#define NHAP_PHAI 0
-
-// vi tri dong chu thong bao
-//#define X_NOTIFY 74
-//#define Y_NOTIFY 19
-
-// vi tri subMainMenu4 
-
-//#define xINDOCGIA 80
-//#define yINDOCGIA 20
-
-
-// so luong dong xuat hien trong 1 bang thong tin
-//#define NUMBER_LINES  29
+#define WIDTH 1366
+#define HEIGHT 768
