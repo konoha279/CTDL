@@ -1,3 +1,0 @@
-struct ListHoaDon{
-	int temp;
-};
