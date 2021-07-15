@@ -44,6 +44,7 @@ int partitionmaNV(ListNhanVien &list, int low, int high);
 int partitiontenNV(ListNhanVien &list, int low, int high);
 void quicksort(ListNhanVien &list, int low, int high, int chedo);
 void swap(ListNhanVien &list, int a, int b);
+int getListHoaDon(const ListHoaDon &list, NhanVien nv);
 //=====Ham=====//
 NhanVien createNhanVien(int maNV, string ho, string ten, int phai){
 	NhanVien nv;
@@ -65,8 +66,7 @@ NhanVien createNhanVien(string line){
 	return nv;
 };
 NhanVien get(const ListNhanVien &list, int maNV){
-	for (int i=0; i<list.n; i++)
-		if(list.nhanViens[i]->maNV==maNV) return *list.nhanViens[i];
+	return *list.nhanViens[indexOf(list, maNV)];
 };
 int indexOf(const ListNhanVien &list, int maNV){
 	for (int i=0; i<list.n; i++)
@@ -197,4 +197,9 @@ void quicksort(ListNhanVien &list, int low, int high, int chedo){
 		quicksort(list, low, pi-1, chedo);
 		quicksort(list, pi+1, high, chedo);
 	}
+};
+int getListHoaDon(const ListHoaDon &list, NhanVien nv){
+	if(list.n==0) return 0;
+	for (HoaDon p = list.phead; p!=NULL; p++)
+		if(p->info.maNV==nv.maNV) addTail(*nv.hoaDons, p->info);
 };
