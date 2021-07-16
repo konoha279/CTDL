@@ -11,9 +11,11 @@ using namespace std;
 
 #define MAXLIST_CT 20
 #define MAX_SOHD 20
-#define MAX_MAVT 10
 #define MAX_NGAYLAP 11
 #define MAX_LOAI 4
+#define MAX_SL 4
+#define MAX_DONGIA 7
+#define MAX_VAT 4
 #define DEFAULT_CTFILE "HoaDon.txt"
 #define NHAP 78
 #define XUAT 88
