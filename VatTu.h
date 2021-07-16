@@ -42,22 +42,12 @@ void remove_case_3(PTRVatTu &r);
 void remove(VatTu vt, PTRVatTu &p);
 PTRVatTu Search(PTRVatTu root, VatTu vt);
 bool isExistVatTu(char *maVT, PTRVatTu p);
-void InorderVatTu(PTRVatTu p);
-void InorderVatTuWithCount(PTRVatTu p, int &i);
-void InChiTiet(PTRVatTu p, FILE *f);
-void InFile(PTRVatTu Head);
-void ReadFile(PTRVatTu &Head);
-void add(mangVatTu &arr, PTRVatTu p);
-void ListToArray(PTRVatTu p, mangVatTu &arr);
-void swapVatTu(PTRVatTu p1, PTRVatTu p2);
-int SoSanhTenVatTu(PTRVatTu p1, PTRVatTu p2);
-int partition (mangVatTu arr, int low, int high);
-int QuicksortVatTu(mangVatTu arr, int low, int high);
-
-int InsertVatTu(PTRVatTu &p, VatTu vt) //tham vat tu
+void Preorder(PTRVatTu p);
+int InsertVatTu(PTRVatTu &p, VatTu vt)
 {
 	if (isExistVatTu(vt.maVT, p))
 	{
+		printf("[-] San pham da ton tai!\n\n");
 		return 0;
 	}
 	if (p == NULL)
@@ -94,11 +84,9 @@ int SoSanhVatTu(VatTu vt1, VatTu vt2)
 			else if (vt1.soLuongTon < vt2.soLuongTon)
 				return -1;
 		}
-		else if (strcmp(vt1.tenVT, vt2.tenVT) < 0) return -1;
-		else if (strcmp(vt1.tenVT, vt2.tenVT) > 0) return 1;
+		else return strcmp(vt1.tenVT, vt2.tenVT);
 	}
-	else if (strcmp(vt1.maVT, vt2.maVT) < 0) return -1;
-	else if (strcmp(vt1.maVT, vt2.maVT) > 0) return 1;
+	else return strcmp(vt1.maVT, vt2.maVT);
 }
 
 void remove_case_3(PTRVatTu &r)
@@ -114,7 +102,7 @@ void remove_case_3(PTRVatTu &r)
 	}
 }
 
-void remove(VatTu vt, PTRVatTu &p) //xoa vat tu
+void remove(VatTu vt, PTRVatTu &p)
 {
 	if (p == NULL)
 		printf("Khong tim thay");
@@ -131,13 +119,13 @@ void remove(VatTu vt, PTRVatTu &p) //xoa vat tu
 		}
 }
 
-PTRVatTu Search(PTRVatTu root, VatTu vt) //tim kiem vat tu
+PTRVatTu Search(PTRVatTu root, VatTu vt)
 {
 	PTRVatTu p;
 	p = root;
 
 	while (p != NULL && !SoSanhVatTu(vt, p->vatTu))
-		if (SoSanhVatTu(vt, p->vatTu) < 0)
+		if (SoSanhVatTu(vt, p->vatTu) == -1)
 			p = p->left;
 		else
 			p = p->right;
@@ -145,24 +133,19 @@ PTRVatTu Search(PTRVatTu root, VatTu vt) //tim kiem vat tu
 	return p;
 }
 
-bool isExistVatTu(char *maVT, PTRVatTu p) //kiem tra su ton tai cua ma vat tu
-{
-	if (p == NULL)
-	{
+bool isExistVatTu(char *maVT, PTRVatTu p){
+	if (p == NULL){
 		return false;
 	}
-	else
-	{
-		if (strcmp(maVT, p->vatTu.maVT) > 0)
+	else{
+		if (strcmp(maVT, p->vatTu.maVT)<0)
 			return isExistVatTu(maVT, p->left);
-		else if (strcmp(maVT, p->vatTu.maVT) < 0)
+		else if (strcmp(maVT, p->vatTu.maVT)>0)
 			return isExistVatTu(maVT, p->right);
 		else if (!strcmp(maVT, p->vatTu.maVT))
 			return true;
 	}
 }
-
-//--------------------------------------------- xuat ra man hinh ---------------------------------------------------
 
 void InorderVatTu(PTRVatTu p)
 {
@@ -174,21 +157,6 @@ void InorderVatTu(PTRVatTu p)
 		InorderVatTu(p->right);
 	}
 }
-
-void InorderVatTuWithCount(PTRVatTu p, int &i)
-{
-	if (p != NULL && i>=0)
-	{
-		i--;
-		InorderVatTuWithCount(p->left, i);
-		if (i <= 0 ) return;
-		printf(" %5s | %-50s | %-5s | %d \n", p->vatTu.maVT, p->vatTu.tenVT, p->vatTu.dvt, p->vatTu.soLuongTon);
-
-		InorderVatTuWithCount(p->right, i);
-	}
-}
-
-// ------------------------------------------------------- in file doc file ----------------------------------------
 
 void InChiTiet(PTRVatTu p, FILE *f)
 {
@@ -208,84 +176,21 @@ void InFile(PTRVatTu Head)
 	fclose(f);	
 }
 
-
 void ReadFile(PTRVatTu &Head)
 {
 	FILE *f;
 	f = fopen("vattu.dat", "rb");
-	VatTu vt;
+	VatTu vt; sizeVatTu=0;
 	while (!feof(f))
 	{
 		fread(&vt, sizeof(struct VatTu), 1, f);
-		if (InsertVatTu(Head, vt)) sizeVatTu++;
+		if(InsertVatTu(Head, vt)) sizeVatTu++;
 	}
 	fclose(f);
 }
 
-//------------------------------------------------- chuyen danh sach vao mang ------------------------------
-
-void add(mangVatTu &arr, PTRVatTu p)
+void add(mangVatTu arr, PTRVatTu p)
 {
 	arr.arr[arr.n] = p;
 	arr.n++;
 }
-
-void ListToArray(PTRVatTu p, mangVatTu &arr)
-{
-	if (p!= NULL)
-	{
-		ListToArray(p->left, arr);
-		add(arr,p);
-		ListToArray(p->right, arr);
-	}
-}
-
-//-------------------------------------------------sap xep-------------------------------------------------
-
-void swapVatTu(PTRVatTu p1, PTRVatTu p2)
-{
-	VatTu tmp = p1->vatTu;
-	p1->vatTu = p2->vatTu;
-	p2->vatTu = tmp;
-}
-
-int SoSanhTenVatTu(PTRVatTu p1, PTRVatTu p2)
-{
-	if (strcmp(p1->vatTu.tenVT, p2->vatTu.tenVT) < 0)
-		return -1;
-	else if (strcmp(p1->vatTu.tenVT, p2->vatTu.tenVT) > 0)
-		return 1;
-	else
-		return 0;
-}
-
-int partition (mangVatTu arr, int low, int high)
-{
-    PTRVatTu pivot = arr.arr[high];
-    int left = low;
-    int right = high - 1;
-    while(true){
-        while(left <= right && SoSanhTenVatTu(arr.arr[left], pivot)  == -1 ) left++;
-        while(right >= left && SoSanhTenVatTu(arr.arr[left], pivot)  == 1) right--;
-        if (left >= right) break;	
-        swapVatTu(arr.arr[left], arr.arr[right]);
-        left++;
-        right--;
-    }
-    swapVatTu(arr.arr[left], arr.arr[high]);
-    return left;
-}
-
-int QuicksortVatTu(mangVatTu arr, int low, int high)
-{
-	if (arr.n <= 0)
-		return -1;
-	if (low < high)
-    {
-        int pi = partition(arr, low, high);
-        QuicksortVatTu(arr, low, pi - 1);
-        QuicksortVatTu(arr, pi + 1, high);
-    }
-}
-
-//--------------------------------------------------------------------------------------------------
