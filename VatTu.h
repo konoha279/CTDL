@@ -231,7 +231,7 @@ void ListToArray(PTRVatTu p, mangVatTu &arr)
 void InMangVatTu(mangVatTu &arr, int n)
 {
 	int i = 0;
-	while (i < arr.n && n >= 0)
+	while (i < arr.n && n > 0)
 	{
 		printf(" %5s | %-50s | %-5s | %d \n", arr.arr[i]->vatTu.maVT, arr.arr[i]->vatTu.tenVT, arr.arr[i]->vatTu.dvt, arr.arr[i]->vatTu.soLuongTon);
 		i++;
