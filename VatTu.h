@@ -8,6 +8,10 @@
 #define MAX_HO 32
 #define MAX_TEN 10
 #define MAX_LIST 10000
+#define MAX_MAVT 10
+#define MAX_TENVT 50
+#define MAX_DVT 10
+#define MAX_SL_TON 6
 int sizeVatTu = 0;
 struct VatTu
 {
