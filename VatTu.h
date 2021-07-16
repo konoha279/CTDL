@@ -43,16 +43,17 @@ void remove(VatTu vt, PTRVatTu &p);
 PTRVatTu Search(PTRVatTu root, VatTu vt);
 bool isExistVatTu(char *maVT, PTRVatTu p);
 void InorderVatTu(PTRVatTu p);
-void InorderVatTuWithCount(PTRVatTu p, int i);
 void InChiTiet(PTRVatTu p, FILE *f);
 void InFile(PTRVatTu Head);
 void ReadFile(PTRVatTu &Head);
 void add(mangVatTu &arr, PTRVatTu p);
 void ListToArray(PTRVatTu p, mangVatTu &arr);
+void InMangVatTu(mangVatTu &arr, int n);
 void swapVatTu(PTRVatTu p1, PTRVatTu p2);
 int SoSanhTenVatTu(PTRVatTu p1, PTRVatTu p2);
 int partition (mangVatTu arr, int low, int high);
 int QuicksortVatTu(mangVatTu arr, int low, int high);
+
 
 int InsertVatTu(PTRVatTu &p, VatTu vt) //tham vat tu
 {
@@ -175,17 +176,6 @@ void InorderVatTu(PTRVatTu p)
 	}
 }
 
-void InorderVatTuWithCount(PTRVatTu p, int i)
-{
-	if (p != NULL && i - 1 >=0)
-	{
-		i--;
-		InorderVatTuWithCount(p->left, i);
-		printf(" %5s | %-50s | %-5s | %d \n", p->vatTu.maVT, p->vatTu.tenVT, p->vatTu.dvt, p->vatTu.soLuongTon);
-		InorderVatTuWithCount(p->right, i);
-	}
-}
-
 // ------------------------------------------------------- in file doc file ----------------------------------------
 
 void InChiTiet(PTRVatTu p, FILE *f)
@@ -238,6 +228,17 @@ void ListToArray(PTRVatTu p, mangVatTu &arr)
 	}
 }
 
+void InMangVatTu(mangVatTu &arr, int n)
+{
+	int i = 0;
+	while (i < arr.n && n >= 0)
+	{
+		printf(" %5s | %-50s | %-5s | %d \n", arr.arr[i]->vatTu.maVT, arr.arr[i]->vatTu.tenVT, arr.arr[i]->vatTu.dvt, arr.arr[i]->vatTu.soLuongTon);
+		i++;
+		n--;
+	}
+}
+
 //-------------------------------------------------sap xep-------------------------------------------------
 
 void swapVatTu(PTRVatTu p1, PTRVatTu p2)
@@ -264,7 +265,7 @@ int partition (mangVatTu arr, int low, int high)
     int right = high - 1;
     while(true){
         while(left <= right && SoSanhTenVatTu(arr.arr[left], pivot)  == -1 ) left++;
-        while(right >= left && SoSanhTenVatTu(arr.arr[left], pivot)  == 1) right--;
+        while(right >= left && SoSanhTenVatTu(arr.arr[right], pivot)  == 1) right--;
         if (left >= right) break;	
         swapVatTu(arr.arr[left], arr.arr[right]);
         left++;
