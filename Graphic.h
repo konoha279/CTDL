@@ -101,6 +101,8 @@ int HoaDonMenu();
 void HoaDonView(const ListNhanVien &list, int page);
 //HoaDon form
 void HoaDonForm(int x, int y);
+void showListHoaDon(int x, int y, ListHoaDon list, int page, int row);
+void showListHoaDon(int x, int y, ListNhanVien list, int page, int row);
 //VatTu table
 void VatTuTable(int x, int y, PTRVatTu head, int page);
 //VatTu view
@@ -808,6 +810,8 @@ void HoaDonTable(int x, int y, const ListNhanVien &list, int page){
 	CreateBox(x+HDTABLELENGTH+HDFORMLENGTH/2-6, y+MAXTABLEROW+1, p, 11);
 	int index = (page-1)*MAXTABLEROW;
 	//show list
+	int row=0;
+	showListHoaDon(x, y, list, page, row);
 };
 void HoaDonForm(int x, int y){
 	if(x<0||y<1) return ;
@@ -838,6 +842,37 @@ void HoaDonForm(int x, int y){
 	for (int i=0; i<4; i++) CreateBox(x+14, y+2+i*3, " ", MAX_SOHD+2);
 	gotoxy(x+15, y+8); cout<<"__/__/____";
 	gotoxy(x+4, y+14); cout<<"HOAN THANH:";
+};
+void showListHoaDon(int x, int y, ListHoaDon list, int page, int row){
+    HoaDon hd;
+    for(hd = list.phead; hd != NULL&&row < 30; hd = hd->next){
+        gotoxy(x+2, y+2+row);
+        cout << hd->info.soHD;
+        gotoxy(x+2+24,y+2+row);
+        cout << hd->info.soHD;
+        gotoxy(x+2+24+11,y+2+row);
+        cout << convertDateToString(hd->info.ngayLap);
+        gotoxy(x+2+24+11+15,y+2+row);
+        cout << hd->info.loai;
+        row++;
+    }
+};
+void showListHoaDon(int x, int y, ListNhanVien list, int page, int row){
+    HoaDon hd;
+    int i,soNV = list.n;
+    for(i = 0; i < soNV; i++){
+        for(hd = list.nhanViens[i]->hoaDons->phead; hd != NULL&&row<30; hd = hd->next){
+            gotoxy(x+2, y+2+row);
+            cout << hd->info.soHD;
+            gotoxy(x+2+24,y+2+row);
+            cout << list.nhanViens[i]->maNV;
+            gotoxy(x+2+24+11,y+2+row);
+            cout << convertDateToString(hd->info.ngayLap);
+            gotoxy(x+2+24+11+15,y+2+row);
+            cout << hd->info.loai;
+            row++;
+        }
+    }
 };
 int VatTuMenu(){
 	PTRVatTu head = NULL;
