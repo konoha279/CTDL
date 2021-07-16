@@ -8,6 +8,10 @@
 #define MAX_HO 32
 #define MAX_TEN 10
 #define MAX_LIST 10000
+#define MAX_MAVT 10
+#define MAX_TENVT 50
+#define MAX_DVT 10
+#define MAX_SL_TON 6
 int sizeVatTu = 0;
 struct VatTu
 {
@@ -39,7 +43,7 @@ void remove(VatTu vt, PTRVatTu &p);
 PTRVatTu Search(PTRVatTu root, VatTu vt);
 bool isExistVatTu(char *maVT, PTRVatTu p);
 void InorderVatTu(PTRVatTu p);
-void InorderVatTuWithCount(PTRVatTu p, int &i);
+void InorderVatTuWithCount(PTRVatTu p, int i);
 void InChiTiet(PTRVatTu p, FILE *f);
 void InFile(PTRVatTu Head);
 void ReadFile(PTRVatTu &Head);
@@ -171,15 +175,13 @@ void InorderVatTu(PTRVatTu p)
 	}
 }
 
-void InorderVatTuWithCount(PTRVatTu p, int &i)
+void InorderVatTuWithCount(PTRVatTu p, int i)
 {
-	if (p != NULL && i>=0)
+	if (p != NULL && i - 1 >=0)
 	{
 		i--;
 		InorderVatTuWithCount(p->left, i);
-		if (i <= 0 ) return;
 		printf(" %5s | %-50s | %-5s | %d \n", p->vatTu.maVT, p->vatTu.tenVT, p->vatTu.dvt, p->vatTu.soLuongTon);
-
 		InorderVatTuWithCount(p->right, i);
 	}
 }
