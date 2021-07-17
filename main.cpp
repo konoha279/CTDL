@@ -1,4 +1,6 @@
-#include "NhanVien.h"
+#include "NhanVienView.h"
+#include "HoaDonView.h"
+#include "VattuView.h"
 #include "Graphic.h"
 #include <ctime>
 #include <cstdlib>
