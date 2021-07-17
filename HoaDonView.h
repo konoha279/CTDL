@@ -26,11 +26,12 @@ void HoaDonView(const ListNhanVien &list, int page);
 //HoaDon form
 void HoaDonForm(int x, int y);
 void showListHoaDon(int x, int y, ListHoaDon list, int page, int row);
-void showListHoaDon(int x, int y, ListNhanVien list, int page, int row);
+void showListHoaDon(int x, int y, ListNhanVien list, int page, int index);
 //=====CT_HD=====//
 void CT_HDTable(int x, int y, ListCT_HD list);
 int addCT_HDMenu(Info &info);
 void addCT_HDView(Info &info);
+int countHoaDon(ListNhanVien list);
 //====Noi dung=====//
 int HoaDonMenu(){
 	ListNhanVien list;
@@ -64,9 +65,10 @@ int HoaDonMenu(){
 				continue;
 			}
 			case PAGE_DOWN:{
-				int n;
-				if(list.n%MAXTABLEROW==0) n=list.n/MAXTABLEROW;
-				else n=list.n/MAXTABLEROW+1;
+				int count = countHoaDon(list);
+				int n; //n la tong so trang
+				if(count%MAXTABLEROW==0) n=count/MAXTABLEROW;
+				else n=count/MAXTABLEROW+1;
 				if (page+1>n) continue;
 				page++;
 				HoaDonTable(XTABLE, YTABLE, list, page);
@@ -161,17 +163,18 @@ void HoaDonTable(int x, int y, const ListNhanVien &list, int page){
 	cout << setw(3 + MAX_NGAYLAP) << setfill(char(205)) << char(202);	
 	cout << setw(3 + MAX_LOAI) << setfill(char(205)) << char(188);
 	//so trang
-	int n; //so dong
-	if (list.n<MAXTABLEROW) n = list.n;
-	else n = MAXTABLEROW;
-	string p = "TRANG: " + to_string(page) + "/";
-	if(list.n%MAXTABLEROW!=0) p += to_string(list.n/MAXTABLEROW + 1);
-	else p+= to_string(list.n/MAXTABLEROW);
-	CreateBox(x+HDTABLELENGTH+HDFORMLENGTH/2-6, y+MAXTABLEROW+1, p, 11);
-	int index = (page-1)*MAXTABLEROW;
-	//show list
-	int row=0;
-	showListHoaDon(x, y, list, page, row);
+    ListHoaDon listHD = getListHoaDon(list);
+    int n; //so dong
+    if (listHD.n<MAXTABLEROW) n = listHD.n;
+    else n = MAXTABLEROW;
+    string p = "TRANG: " + to_string(page) + "/";
+    if(listHD.n%MAXTABLEROW!=0) p += to_string(listHD.n/MAXTABLEROW + 1);
+    else p+= to_string(listHD.n/MAXTABLEROW);
+    CreateBox(x+HDTABLELENGTH+HDFORMLENGTH/2-6, y+MAXTABLEROW+4, p, 11);
+    int index = (page-1)*MAXTABLEROW;
+    //show list
+    showListHoaDon(x, y, list, page, index);
+
 };
 void HoaDonForm(int x, int y){
 	if(x<0||y<1) return ;
@@ -217,22 +220,26 @@ void showListHoaDon(int x, int y, ListHoaDon list, int page, int row){
         row++;
     }
 };
-void showListHoaDon(int x, int y, ListNhanVien list, int page, int row){
+void showListHoaDon(int x, int y, ListNhanVien list, int page, int index){
     HoaDon hd;
     int i,soNV = list.n;
+    int row = 0, count = 0;
     for(i = 0; i < soNV; i++){
-        for(hd = list.nhanViens[i]->hoaDons->phead; hd != NULL&&row<30; hd = hd->next){
-            gotoxy(x+2, y+2+row);
-            cout << hd->info.soHD;
-            gotoxy(x+2+MAX_SOHD+3,y+2+row);
-            cout << list.nhanViens[i]->maNV;
-            gotoxy(x+2+MAX_SOHD+3+MAX_MANV+3,y+2+row);
-            cout << list.nhanViens[i]->ho + " " + list.nhanViens[i]->ten;
-            gotoxy(x+2+MAX_SOHD+3+MAX_MANV+3+MAX_HO+1+MAX_TEN+3, y+2+row);
-            cout << convertDateToString(hd->info.ngayLap);
-            gotoxy(x+2+MAX_SOHD+3+MAX_MANV+3+MAX_HO+1+MAX_TEN+3+MAX_NGAYLAP+3, y+2+row);
-            cout << hd->info.loai;
-            row++;
+        for(hd = list.nhanViens[i]->hoaDons->phead; hd!=NULL&&row<30; hd = hd->next){
+            if (count>=index){
+            	gotoxy(x+2, y+2+row);
+	            cout << hd->info.soHD;
+	            gotoxy(x+2+MAX_SOHD+3,y+2+row);
+	            cout << list.nhanViens[i]->maNV;
+	            gotoxy(x+2+MAX_SOHD+3+MAX_MANV+3,y+2+row);
+	            cout << list.nhanViens[i]->ho + " " + list.nhanViens[i]->ten;
+	            gotoxy(x+2+MAX_SOHD+3+MAX_MANV+3+MAX_HO+1+MAX_TEN+3, y+2+row);
+	            cout << convertDateToString(hd->info.ngayLap);
+	            gotoxy(x+2+MAX_SOHD+3+MAX_MANV+3+MAX_HO+1+MAX_TEN+3+MAX_NGAYLAP+3, y+2+row);
+	            cout << hd->info.loai;
+				row++;
+			}
+			count++;
         }
     }
 };
@@ -291,4 +298,10 @@ void addCT_HDView(Info &info){
 	gotoxy(XTABLE, 0); cout<<char(186)<<"SOHD   :";
 	gotoxy(XTABLE, 1); cout<<char(186)<<"NGAYLAP:";
 	gotoxy(XTABLE, 2); cout<<char(186)<<"LOAI   :";
+};
+int countHoaDon(ListNhanVien list){
+  int count = 0;
+  for (int i=0; i<list.n; i++)
+    count+=list.nhanViens[i]->hoaDons->n;
+  return count;
 };

@@ -3,11 +3,12 @@
 #include <fstream>
 #include <conio.h>
 #include <string>
-#include <string.h>
+#include <string.h> 
 #include <vector>
 #include <cstdlib>
 #include "HoaDon.h"
 #define MAX_NV 500
+#define MAX_MANV 4
 #define MAX_HO 32
 #define MAX_TEN 10
 #define MAX_NVTOSTRING 4
@@ -44,6 +45,7 @@ int partitionmaNV(ListNhanVien &list, int low, int high);
 int partitiontenNV(ListNhanVien &list, int low, int high);
 void quicksort(ListNhanVien &list, int low, int high, int chedo);
 void swap(ListNhanVien &list, int a, int b);
+ListHoaDon getListHoaDon(ListNhanVien list);
 //=====Ham=====//
 NhanVien createNhanVien(int maNV, string ho, string ten, int phai){
 	NhanVien nv;
@@ -214,4 +216,14 @@ void quicksort(ListNhanVien &list, int low, int high, int chedo){
 		quicksort(list, low, pi-1, chedo);
 		quicksort(list, pi+1, high, chedo);
 	}
+};
+ListHoaDon getListHoaDon(ListNhanVien list){
+    int soNV = list.n,i;
+    HoaDon hd;
+    ListHoaDon listHD;
+    for(i = 0; i < soNV; i++){
+        for(hd = list.nhanViens[i]->hoaDons->phead; hd != NULL; hd = hd->next)
+            addTail(listHD, hd->info);
+    }
+    return listHD;
 };
