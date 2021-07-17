@@ -135,6 +135,23 @@ void remove(VatTu vt, PTRVatTu &p) //xoa vat tu
 		}
 }
 
+void remove(PTRVatTu &p, char *mavt) //xoa vat tu
+{
+	if (p == NULL)
+		printf("Khong tim thay");
+	else
+		if (strcmp(mavt, p->vatTu.maVT) < 0) remove(p->left, mavt);
+		else if (strcmp(mavt, p->vatTu.maVT) > 0) remove(p->right, mavt);
+		else
+		{
+			PTRVatTu rp = p;
+			if (rp->right == NULL) p = rp->left;
+			else if (rp->left == NULL) p = rp->right;
+			else remove_case_3(rp->right);
+			delete rp;
+		}
+}
+
 PTRVatTu Search(PTRVatTu root, VatTu vt) //tim kiem vat tu
 {
 	PTRVatTu p;
