@@ -6,8 +6,11 @@
 // Cac HotKey
 #define CTRL_A 1
 #define CTRL_F 6
+#define CTRL_L 12
 #define CTRL_N 14
+#define CTRL_P 16
 #define CTRL_S 19
+#define CTRL_V 22
 #define BACKSPACE 8
 #define TAB 9
 #define ENTER 13
