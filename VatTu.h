@@ -121,7 +121,7 @@ void remove_case_3(PTRVatTu &r)
 void remove(VatTu vt, PTRVatTu &p) //xoa vat tu
 {
 	if (p == NULL)
-		printf("Khong tim thay");
+		return;
 	else
 		if (SoSanhVatTu(vt, p->vatTu) == -1) remove(vt, p->left);
 		else if (SoSanhVatTu(vt, p->vatTu) == 1) remove(vt, p->right);
@@ -138,7 +138,7 @@ void remove(VatTu vt, PTRVatTu &p) //xoa vat tu
 void remove(PTRVatTu &p, char *mavt) //xoa vat tu
 {
 	if (p == NULL)
-		printf("Khong tim thay");
+		return;
 	else
 		if (strcmp(mavt, p->vatTu.maVT) < 0) remove(p->left, mavt);
 		else if (strcmp(mavt, p->vatTu.maVT) > 0) remove(p->right, mavt);
