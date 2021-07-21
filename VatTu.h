@@ -52,7 +52,7 @@ void add(mangVatTu &arr, PTRVatTu p);
 void ListToArray(PTRVatTu p, mangVatTu &arr);
 void InMangVatTu(mangVatTu &arr);
 void InMangVatTu(mangVatTu &arr, int n);
-void swapVatTu(VatTu vt1, VatTu vt2);
+void swapVatTu(VatTu &vt1, VatTu &vt2);
 int SoSanhTenVatTu(VatTu vt1, VatTu vt2);
 int partition (mangVatTu &arr, int low, int high);
 int QuicksortVatTu(mangVatTu &arr, int low, int high);
@@ -324,7 +324,7 @@ void getMangVatTu(mangVatTu &des, mangVatTu src, int n) // lay n phan tu cua src
 
 //-------------------------------------------------sap xep-------------------------------------------------
 
-void swapVatTu(VatTu vt1, VatTu vt2)
+void swapVatTu(VatTu &vt1, VatTu &vt2)
 {
 	VatTu tmp = vt1;
 	vt1 = vt2;
