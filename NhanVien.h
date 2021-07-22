@@ -48,7 +48,10 @@ int partitiontenNV(ListNhanVien &list, int low, int high);
 void quicksort(ListNhanVien &list, int low, int high, int chedo);
 void swap(ListNhanVien &list, int a, int b);
 ListHoaDon getListHoaDon(ListNhanVien list);
+HoaDon getHD(ListNhanVien list, char soHD[]);
 void free(ListNhanVien &list);
+CT_HD getCT_HD(ListNhanVien &list, char mavt[]);
+NhanVien getNV(ListNhanVien list, char soHD[]);
 //=====Ham=====//
 NhanVien createNhanVien(int maNV, string ho, string ten, int phai){
 	NhanVien nv;
@@ -259,4 +262,37 @@ void free(ListNhanVien &list){
 		delete list.nhanViens[i];
 	};
 	list.n = 0;
+};
+HoaDon getHD(ListNhanVien list, char soHD[]){
+    if(list.n == 0) return NULL;
+    HoaDon hd;
+    int i,soNV = list.n;
+    for(i = 0; i < soNV; i++){
+        hd = get(*list.nhanViens[i]->hoaDons,soHD);
+        if(hd != NULL) return hd;
+    }
+    return NULL;
+};
+CT_HD getCT_HD(ListNhanVien &list, char mavt[]){
+	CT_HD ct; ct.soluong=0;
+	int i, j;
+	HoaDon h;
+	for (i=0; i<list.n; i++)
+		for (h = list.nhanViens[i]->hoaDons->phead; h!=NULL; h=h->next)
+			for (j=0; j<h->info.listct->n; j++)
+				if(!strcmp(h->info.listct->ct[j].maVT,mavt)) return h->info.listct->ct[j];
+	return ct;
+};
+NhanVien getNV(ListNhanVien list, char soHD[]){
+    NhanVien nv,nv1;
+    nv1.maNV = -1;
+    if(list.n == 0) return nv1;
+    HoaDon hd;
+    int i,soNV = list.n;
+    for(i = 0; i < soNV; i++){
+        nv = *list.nhanViens[i];
+        hd = get(*nv.hoaDons,soHD);
+        if(hd != NULL) return nv;
+    }
+    return nv1;
 };

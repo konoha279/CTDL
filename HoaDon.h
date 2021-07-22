@@ -11,9 +11,11 @@ using namespace std;
 
 #define MAXLIST_CT 20
 #define MAX_SOHD 20
-#define MAX_MAVT 10
-#define MAX_NGAYLAP 11
+#define MAX_NGAYLAP 10
 #define MAX_LOAI 4
+#define MAX_SL 4
+#define MAX_DONGIA 7
+#define MAX_VAT 4
 #define DEFAULT_CTFILE "HoaDon.txt"
 #define NHAP 78
 #define XUAT 88
@@ -66,6 +68,7 @@ HoaDon get(const ListHoaDon &list, char soHD[]);
 Info createInfo(string str);
 string toString(const Info &info);
 string toString(const ListHoaDon &list);
+float trigia(Info info);
 //=====Ham=====//
 vector<string> split(const string& str, const string& delim){
     vector<string> tokens;
@@ -218,4 +221,10 @@ string toString(const ListHoaDon &list){
 			str += toString(hd->info.listct->ct[i]) + "\n";
 	}
 	return str;
+};
+float trigia(Info info){
+	float tong = 0;
+	for (int i=0; i<info.listct->n; i++)
+		tong += info.listct->ct[i].dongia * info.listct->ct[i].soluong;
+	return tong;
 };

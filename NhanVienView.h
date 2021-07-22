@@ -58,7 +58,7 @@ void NhanVienView(const ListNhanVien &list, int page){
 void NhanVienTable(int x, int y, const ListNhanVien &list, int page){
 	if(x<0||y<4) return;
 	//xoa vung ve bang
-	for (int i=0; i<=MAXTABLEROW+2; i++){
+	for (int i=0; i<=MAXTABLEROW+3; i++){
 		gotoxy(x, y-1+i);
 		cout<<" "<<setw(NVTABLELENGTH)<<setfill(' ')<<" "; 
 	}
@@ -131,10 +131,13 @@ void NhanVienTable(int x, int y, const ListNhanVien &list, int page){
 };
 int NhanVienMenu(){
 	ListNhanVien list; list.n=0;
-	if(readFileNV(list, DEFAULT_NVFILE)) cout<<"\nLoi doc file";
+	if(readFileNV(list, DEFAULT_NVFILE)) {
+		string tb = "LOI DOC FILE!";
+		thongbao((MAXLINE-tb.length())/2, MAXROW/2+2, "CANH BAO", tb, tb.length(), YELLOW, RED);
+		return 0;
+	}
 	quicksort(list, 0, list.n - 1, 0);
 	char c;
-	string str;
 	int line = 0, page = 1;
 	int y = YTABLE + 2, x = XTABLE+17;
 	NhanVienView(list, page);
@@ -578,7 +581,7 @@ void editNhanVienForm(int xform, int yform, ListNhanVien& list, int page, int xt
 	}
 };
 void timkiem(ListNhanVien &list){
-	ListNhanVien list2 = search(list, searchBox(XTABLE+17, YTABLE+6, NVFORMLENGTH-3));
+	ListNhanVien list2 = search(list, searchBox(XTABLE+17, YTABLE+6, NVFORMLENGTH-3, "TIM KIEM"));
 	char c;
 	int line = 0, page = 1;
 	int y = YTABLE + 2, x = XTABLE+17;

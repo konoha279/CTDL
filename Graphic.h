@@ -21,13 +21,13 @@
 #define YTABLE 5
 #define YTABLE2 22
 #define XTABLE 1
-#define VTTABLELENGTH 87
+#define VTTABLELENGTH 91
 #define VTFORMLENGTH 66
 using namespace std;
 string mainbutton[] = {"VATTU", "NHAN VIEN", "HOA DON", "THONGKE", "THOAT"};
 int mainbuttonn = 5;
-string buttomButton[] = {"ESC", "CTRL+F", "CTRL+N", "ENTER", "CTRL+S", "CTRL+V", "CTRL+L", "PAGE", "CTRL+P"};
-string buttomCommand[] = {"QUAY LAI", "TIM KIEM", "THEM MOI", "CHON", 
+string buttomButton[] = {"ESC", "CTRL+F", "CTRL+N", "ENTER", "DELETE", "CTRL+S", "CTRL+V", "CTRL+L", "PAGE", "CTRL+P"};
+string buttomCommand[] = {"QUAY LAI", "TIM KIEM", "THEM MOI", "CHON", "XOA", 
 					"SAVE FILE", "SAP XEP", "LOAD FILE","TRANG", "XUAT HOA DON"};
 int buttomCommandn = 9;
 //=====Ten Ham=====//
@@ -51,7 +51,7 @@ int luachon(int x, int y, string tb, int length);
 //Huong dan nhap
 void HuongDanNhap(int x, int y, string hd[], int n, int row, int length);
 //Bang search
-string searchBox(int x, int y, int length);
+string searchBox(int x, int y, int length, string search);
 //=====Ham=====//
 string toString(int f, int size){
 	string str = to_string(f);
@@ -295,7 +295,7 @@ void HuongDanNhap(int x, int y, string hd[], int n, int row, int length){
 		cout<<hd[i];
 	}
 };
-string searchBox(int x, int y, int length){
+string searchBox(int x, int y, int length, string search){
 	if(x<0||y<1) return "";
 	int i;
 	gotoxy(x,y-1);
@@ -306,7 +306,6 @@ string searchBox(int x, int y, int length){
 	}
 	gotoxy(x, y+i);
 	cout << char(200) << setw(length+3) << setfill(char(205)) << char(188);
-	string search = "TIM KIEM";
 	gotoxy(x + (length+3-search.length())/2, y); cout<<search;
 	CreateBox(x+1, y+2, "", length);
 	gotoxy(x+2,y+2); Cursor(true, 100);
