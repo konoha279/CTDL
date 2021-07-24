@@ -258,10 +258,10 @@ ListHoaDon getListHoaDon(ListNhanVien list){
     return listHD;
 };
 void free(ListNhanVien &list){
-	for (int i=0; i<list.n; i++){
+	for (int i=0; i<list.n; i++)
 		delete list.nhanViens[i];
-	};
 	list.n = 0;
+	list.sort = 0;
 };
 HoaDon getHD(ListNhanVien list, char soHD[]){
     if(list.n == 0) return NULL;

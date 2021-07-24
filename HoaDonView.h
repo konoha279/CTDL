@@ -15,7 +15,7 @@
 #define MAXCTROW 20
 using namespace std;
 string hdTittle = "  QUAN LI HOA DON  ";
-string hdHeader[] = {" SOHD ", " MANV ", " HOTEN "," NGAYLAP ", " LOAI "};
+string hdHeader[] = {" SO HOA DON ", " MANV ", " HOTEN "," NGAYLAP ", " LOAI "};
 string ctHeader[] = {" MAVATTU ", "   SL ", " DONGIA ", " %VAT "};
 string hdNhapHD[] = {"1. SOHD khong qua 20 ki tu in",
 					 "   va khong chua ki tu dac biet",	

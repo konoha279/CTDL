@@ -7,8 +7,7 @@
 #include <thread>
 #include <iomanip>
 #include <vector>
-#include "NhanVien.h"
-#include "VatTu.h"
+#include "ThongKe.h"
 #include "mylib2.h"
 #include "ChuanHoa.h"
 #define LOGO  "logo.txt"
