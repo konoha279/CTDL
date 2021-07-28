@@ -3,11 +3,12 @@
 #include <fstream>
 #include <conio.h>
 #include <string>
-#include <string.h>
+#include <string.h> 
 #include <vector>
 #include <cstdlib>
 #include "HoaDon.h"
 #define MAX_NV 500
+#define MAX_MANV 4
 #define MAX_HO 32
 #define MAX_TEN 10
 #define MAX_NVTOSTRING 4
@@ -23,17 +24,19 @@ struct NhanVien{
 };
 struct ListNhanVien{
 	int n = 0;
+	int sort = 0;
 	NhanVien *nhanViens[MAX_NV];
 };
 //=====Ten Ham=====//
 NhanVien createNhanVien(int maNV, string ho, string ten, int phai);
 NhanVien createNhanVien(string line);
-NhanVien get(const ListNhanVien &list, int maNV);
-int indexOf(const ListNhanVien &list, int maNV);
+NhanVien get(ListNhanVien &list, int maNV);
+int indexOf(ListNhanVien &list, int left, int right, int maNV);
 int add(ListNhanVien &list, NhanVien &nv);
 int add(ListNhanVien &list, NhanVien &nv, int vitri);
 int insertOrder(ListNhanVien &list, NhanVien &nv);
 int remove(ListNhanVien &list, int maNV);
+int exchange(ListNhanVien &list, NhanVien nv);
 int compareTen(NhanVien *nv1, NhanVien *nv2);
 string toString(NhanVien nv);
 int readFileNV(ListNhanVien &list, const string &filename);
@@ -44,6 +47,11 @@ int partitionmaNV(ListNhanVien &list, int low, int high);
 int partitiontenNV(ListNhanVien &list, int low, int high);
 void quicksort(ListNhanVien &list, int low, int high, int chedo);
 void swap(ListNhanVien &list, int a, int b);
+ListHoaDon getListHoaDon(ListNhanVien list);
+HoaDon getHD(ListNhanVien list, char soHD[]);
+void free(ListNhanVien &list);
+CT_HD getCT_HD(ListNhanVien &list, char mavt[]);
+NhanVien getNV(ListNhanVien list, char soHD[]);
 //=====Ham=====//
 NhanVien createNhanVien(int maNV, string ho, string ten, int phai){
 	NhanVien nv;
@@ -65,12 +73,24 @@ NhanVien createNhanVien(string line){
 	nv.hoaDons->n = atoi(v[4].c_str());
 	return nv;
 };
-NhanVien get(const ListNhanVien &list, int maNV){
-	return *list.nhanViens[indexOf(list, maNV)];
+NhanVien get(ListNhanVien &list, int maNV){
+	int index = indexOf(list, 0, list.n-1, maNV);
+	if (index>=0) return *list.nhanViens[index];
+	NhanVien nv;
+	return nv;
 };
-int indexOf(const ListNhanVien &list, int maNV){
-	for (int i=0; i<list.n; i++)
-		if(list.nhanViens[i]->maNV==maNV) return i;
+int indexOf(ListNhanVien &list, int left, int right, int maNV){
+	if (list.sort==1){
+		list.sort=0;
+		quicksort(list,0,list.n-1,0);
+	}
+	int mid;
+	while(left<=right){
+		mid = left + (right - left)/2;
+		if (list.nhanViens[mid]->maNV==maNV) return mid;
+		if (list.nhanViens[mid]->maNV < maNV) left = mid + 1;
+		else right = mid - 1;
+	}
 	return -1;
 };
 int add(ListNhanVien &list, NhanVien &nv){
@@ -90,6 +110,10 @@ int add(ListNhanVien &list, NhanVien &nv, int vitri){
 };
 int insertOrder(ListNhanVien &list, NhanVien &nv){
 	if(list.n==MAX_NV) return -1;
+	if (list.sort==1){
+		list.sort=0;
+		quicksort(list,0,list.n-1,0);
+	}
 	int j,k;
 	for (j=0;j<list.n&&list.nhanViens[j]->maNV<nv.maNV; j++);
 	for (k=list.n-1; k>=j; k--) list.nhanViens[k+1] = list.nhanViens[k];
@@ -99,11 +123,19 @@ int insertOrder(ListNhanVien &list, NhanVien &nv){
 	return 1;
 };
 int remove(ListNhanVien &list, int maNV){
-	int i = indexOf(list, maNV);
+	int i = indexOf(list, 0, list.n-1, maNV);
 	if(i==-1) return -1;
 	delete list.nhanViens[i];
 	for (int j=i+1; j<list.n; j++) list.nhanViens[j-1] = list.nhanViens[j];
 	list.n--;
+	return 1;
+};
+int exchange(ListNhanVien &list, NhanVien nv){
+	int i = indexOf(list, 0, list.n-1, nv.maNV);
+	if(i==-1) return i;
+	delete list.nhanViens[i];
+	list.nhanViens[i] = new NhanVien;
+	*list.nhanViens[i] = nv;
 	return 1;
 };
 int compareTen(NhanVien *nv1, NhanVien *nv2){
@@ -162,9 +194,9 @@ ListNhanVien copyList(const ListNhanVien &list){
 	}
 	return index;
 };
-ListNhanVien search(const ListNhanVien &list, const string &delim){
+ListNhanVien search(const ListNhanVien &list, const string &delim){	
 	ListNhanVien list2;
-	list2.n = 0;
+	if (delim=="") return list2;
 	string str;
 	for (int i=0; i<list.n; i++){
 		str = toString(*list.nhanViens[i]);
@@ -214,4 +246,53 @@ void quicksort(ListNhanVien &list, int low, int high, int chedo){
 		quicksort(list, low, pi-1, chedo);
 		quicksort(list, pi+1, high, chedo);
 	}
+};
+ListHoaDon getListHoaDon(ListNhanVien list){
+    int soNV = list.n,i;
+    HoaDon hd;
+    ListHoaDon listHD;
+    for(i = 0; i < soNV; i++){
+        for(hd = list.nhanViens[i]->hoaDons->phead; hd != NULL; hd = hd->next)
+            addTail(listHD, hd->info);
+    }
+    return listHD;
+};
+void free(ListNhanVien &list){
+	for (int i=0; i<list.n; i++)
+		delete list.nhanViens[i];
+	list.n = 0;
+	list.sort = 0;
+};
+HoaDon getHD(ListNhanVien list, char soHD[]){
+    if(list.n == 0) return NULL;
+    HoaDon hd;
+    int i,soNV = list.n;
+    for(i = 0; i < soNV; i++){
+        hd = get(*list.nhanViens[i]->hoaDons,soHD);
+        if(hd != NULL) return hd;
+    }
+    return NULL;
+};
+CT_HD getCT_HD(ListNhanVien &list, char mavt[]){
+	CT_HD ct; ct.soluong=0;
+	int i, j;
+	HoaDon h;
+	for (i=0; i<list.n; i++)
+		for (h = list.nhanViens[i]->hoaDons->phead; h!=NULL; h=h->next)
+			for (j=0; j<h->info.listct->n; j++)
+				if(!strcmp(h->info.listct->ct[j].maVT,mavt)) return h->info.listct->ct[j];
+	return ct;
+};
+NhanVien getNV(ListNhanVien list, char soHD[]){
+    NhanVien nv,nv1;
+    nv1.maNV = -1;
+    if(list.n == 0) return nv1;
+    HoaDon hd;
+    int i,soNV = list.n;
+    for(i = 0; i < soNV; i++){
+        nv = *list.nhanViens[i];
+        hd = get(*nv.hoaDons,soHD);
+        if(hd != NULL) return nv;
+    }
+    return nv1;
 };
