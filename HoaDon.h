@@ -11,9 +11,11 @@ using namespace std;
 
 #define MAXLIST_CT 20
 #define MAX_SOHD 20
-#define MAX_MAVT 10
-#define MAX_NGAYLAP 11
+#define MAX_NGAYLAP 10
 #define MAX_LOAI 4
+#define MAX_SL 4
+#define MAX_DONGIA 7
+#define MAX_VAT 4
 #define DEFAULT_CTFILE "HoaDon.txt"
 #define NHAP 78
 #define XUAT 88
@@ -48,6 +50,7 @@ struct ListHoaDon{
 vector<string> split(const string& str, const string& delim);
 //=====CT_HD=====//
 CT_HD createCT_HD(string str);
+CT_HD createCT_HD(string maVT, int soLuong, int donGia, float VAT);
 string toString(const CT_HD &ct);
 CT_HD get(const ListCT_HD &list, char maVT[]);
 int indexOf(const ListCT_HD &list, char maVT[]);
@@ -66,6 +69,7 @@ HoaDon get(const ListHoaDon &list, char soHD[]);
 Info createInfo(string str);
 string toString(const Info &info);
 string toString(const ListHoaDon &list);
+float trigia(Info info);
 //=====Ham=====//
 vector<string> split(const string& str, const string& delim){
     vector<string> tokens;
@@ -89,6 +93,14 @@ CT_HD createCT_HD(string str){
 	ct.soluong = atoi(v[1].c_str());
 	ct.dongia = atoi(v[2].c_str());
 	ct.VAT = atoi(v[3].c_str());
+	return ct;
+};
+CT_HD createCT_HD(string maVT, int soLuong, int donGia, float VAT){
+	CT_HD ct;
+	strcpy(ct.maVT, maVT.c_str());
+	ct.soluong = soLuong;
+	ct.dongia = donGia;
+	ct.VAT = VAT;
 	return ct;
 };
 string toString(const CT_HD &ct){
@@ -218,4 +230,10 @@ string toString(const ListHoaDon &list){
 			str += toString(hd->info.listct->ct[i]) + "\n";
 	}
 	return str;
+};
+float trigia(Info info){
+	float tong = 0;
+	for (int i=0; i<info.listct->n; i++)
+		tong += info.listct->ct[i].dongia * info.listct->ct[i].soluong;
+	return tong;
 };
