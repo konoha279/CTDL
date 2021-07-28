@@ -14,7 +14,7 @@ int hdNhapVTn = 6;
 //VatTu table
 void VatTuTable(int x, int y, const mangVatTu &arr, int page);
 //VatTu view
-int VatTuMenu(PTRVatTu &head);
+int VatTuMenu(PTRVatTu &head, ListNhanVien &list);
 void showListVatTu(int x, int y, const mangVatTu &arr, int page);
 void VatTuView(const mangVatTu &arr, int page);
 void VatTuForm(int x, int y);
@@ -23,7 +23,7 @@ void editVatTuForm(int xform, int yform, PTRVatTu &root, int page, int xtable, i
 string getMaVTTable(int x, int y, int line);
 void timkiem(PTRVatTu head);
 //=====Noi dung=====//
-int VatTuMenu(PTRVatTu &head){
+int VatTuMenu(PTRVatTu &head, ListNhanVien &list){
 	mangVatTu arr;
 	ListToArray(head, arr);
 	char c;
@@ -136,10 +136,7 @@ int VatTuMenu(PTRVatTu &head){
 				string str = getMaVTTable(XTABLE + 1, YTABLE + 2, line);
 				char mavt[11];
 				strcpy(mavt, str.c_str());
-				ListNhanVien list;
-				readFileNV(list, DEFAULT_NVFILE);
 				CT_HD ct = getCT_HD(list, mavt);
-				free(list);
 				if(ct.soluong!=0) {
 					thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6,"CANH BAO",
 					"VAT TU DA DUOC LAP HOA DON, KHONG DUOC QUYEN XOA!", VTFORMLENGTH-2, YELLOW, RED);

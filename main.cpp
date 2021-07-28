@@ -32,7 +32,7 @@ int main(){
 	while (true){
 		switch (mainMenu()){
 			case 1: {
-				VatTuMenu(head);
+				VatTuMenu(head, list);
 				continue;
 			}
 			case 2: {
