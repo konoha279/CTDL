@@ -182,7 +182,6 @@ int ReadFile(PTRVatTu &Head){
 	FILE *f;
 	f = fopen("vattu.dat", "rb");
 	VatTu vt;
-	sizeVatTu=0;
 	while (!feof(f)) {
 		fread(&vt, sizeof(struct VatTu), 1, f);
 		if (InsertVatTu(Head, vt)) sizeVatTu++;

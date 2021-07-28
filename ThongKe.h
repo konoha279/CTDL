@@ -145,14 +145,17 @@ void free(Listdata2 &list){
 	list.n = 0;
 	list.sort = 0;
 };
-void xuli(Listdata1 &list1, Listdata2 &list2, const Date &date1, const Date &date2, const ListNhanVien &list, const PTRVatTu &head){
+void xuli(Listdata1 &list1, Listdata2 &list2, const Date &date1, const Date &date2){
 	if(list1.n!=0) free(list1);
 	if(list2.n!=0) free(list2);
+	ListNhanVien list;
+	if(readFileNV(list, DEFAULT_NVFILE)!=1) cout<<"Loi doc file";
+	PTRVatTu head = NULL, node = NULL;
+	if(ReadFile(head)!=1) cout<<"Loi doc file";
 	NhanVien nv;
 	HoaDon hd;
 	CT_HD ct;
 	Info info;
-	PTRVatTu node;
 	int i,j;
 	for (i=0; i<list.n; i++){
 		nv = *list.nhanViens[i];
@@ -169,6 +172,8 @@ void xuli(Listdata1 &list1, Listdata2 &list2, const Date &date1, const Date &dat
 			}
 		}
 	}
+	free(list);
+	freePTRVatTu(head);
 	quicksort(list2, 0, list2.n-1, 1);
 	list2.sort=1;
 };

@@ -14,19 +14,21 @@ int hdNhapVTn = 6;
 //VatTu table
 void VatTuTable(int x, int y, const mangVatTu &arr, int page);
 //VatTu view
-int VatTuMenu(PTRVatTu &head);
+int VatTuMenu();
 void showListVatTu(int x, int y, const mangVatTu &arr, int page);
 void VatTuView(const mangVatTu &arr, int page);
 void VatTuForm(int x, int y);
 void addVatTuForm(int xform, int yform, PTRVatTu &root, int page);
 void editVatTuForm(int xform, int yform, PTRVatTu &root, int page, int xtable, int ytable, int tline);
 string getMaVTTable(int x, int y, int line);
-void timkiem(PTRVatTu head);
 //=====Noi dung=====//
-int VatTuMenu(PTRVatTu &head){
+int VatTuMenu(){
+	PTRVatTu head = NULL;
+	ReadFile(head);
 	mangVatTu arr;
 	ListToArray(head, arr);
 	char c;
+	string str;
 	int line = 0, page = 1;
 	int y = YTABLE + 2, x = XTABLE+1;
 	VatTuView(arr, page);
@@ -118,7 +120,6 @@ int VatTuMenu(PTRVatTu &head){
 				"Neu load file, du lieu chua duoc luu se mat, ban chac chan muon load file?", 80)==1){
 					freePTRVatTu(head);
 					removeMang(arr);
-					sizeVatTu=0;
 					head = NULL;
 					ReadFile(head);
 					ListToArray(head, arr);
@@ -156,16 +157,12 @@ int VatTuMenu(PTRVatTu &head){
 				continue;
 			}
 			case CTRL_F:{
-				timkiem(head);
+				thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6,"THONG BAO",
+				"CHUC NANG NAY DANG CHINH SUA(HOAC TRONG DE KHONG CO)", VTFORMLENGTH-2, BLUE, LIGHT_YELLOW);
 				VatTuTable(XTABLE, YTABLE, arr, page);
 				break;
 			}
-			case ESC: {
-				if (luachon(XTABLE + VTTABLELENGTH + 2, MAXROW-6, 
-				"Neu thoat du lieu cua ban se khong duoc luu lai. Ban chac chan muon thoat?",80)==1) return 1;
-				VatTuTable(XTABLE, YTABLE, arr, page);
-				continue;
-			}
+			case ESC: return -1;
 		}
 	}
 };
@@ -358,14 +355,14 @@ void addVatTuForm(int xform, int yform, PTRVatTu &root, int page){
 						trim(str);
 						if (str.length()>MAX_MAVT){
 							thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6, "CANH BAO",
-							"MA VAT TU KHONG QUA 10 KI TU!", VTFORMLENGTH-2, YELLOW, RED);
+							"MA VAT TU KHONG QUA 10 KI TU!", VTFORMLENGTH-2, YELLOW, LIGHT_RED);
 							VatTuTable(XTABLE, YTABLE, arr, page);
 							continue;
 						}
 						strcpy(vt.maVT, str.c_str());
 						if (isExistVatTu(root, vt.maVT)) {
 							thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6, "CANH BAO",
-							"TRUNG MA VAT TU!", VTFORMLENGTH-2, YELLOW, RED);
+							"TRUNG MA VAT TU!", VTFORMLENGTH-2, YELLOW, LIGHT_RED);
 							VatTuTable(XTABLE, YTABLE, arr, page);
 							continue;
 						}
@@ -378,7 +375,7 @@ void addVatTuForm(int xform, int yform, PTRVatTu &root, int page){
 						trim(str);
 						if (str.length()>MAX_DVT){
 							thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6, "CANH BAO",
-							"DON VI TINH KHONG QUA 10 KI TU!", VTFORMLENGTH-2, YELLOW, RED);
+							"DON VI TINH KHONG QUA 10 KI TU!", VTFORMLENGTH-2, YELLOW, LIGHT_RED);
 							VatTuTable(XTABLE, YTABLE, arr, page);
 							continue;
 						}
@@ -389,7 +386,7 @@ void addVatTuForm(int xform, int yform, PTRVatTu &root, int page){
 						vt.soLuongTon = atoi(str.c_str());
 						if (vt.soLuongTon==0){
 							thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6, "CANH BAO",
-							"SO LUONG TON KHONG DUOC DE TRONG!", VTFORMLENGTH-2, YELLOW, RED);
+							"SO LUONG TON KHONG DUOC DE TRONG!", VTFORMLENGTH-2, YELLOW, LIGHT_RED);
 							VatTuTable(XTABLE, YTABLE, arr, page);
 							continue;
 						}
@@ -400,7 +397,7 @@ void addVatTuForm(int xform, int yform, PTRVatTu &root, int page){
 							return;
 						}else{
 							thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6, "THAT BAI",
-							"VAT TU CHUA DUOC THEM, HAY KIEM TRA LAI!", VTFORMLENGTH-2, YELLOW, RED);
+							"VAT TU CHUA DUOC THEM, HAY KIEM TRA LAI!", VTFORMLENGTH-2, YELLOW, LIGHT_RED);
 							VatTuTable(XTABLE, YTABLE, arr, page);
 							continue;
 						}
@@ -414,11 +411,11 @@ void addVatTuForm(int xform, int yform, PTRVatTu &root, int page){
 								cout<<char(toupper(c)); x++;
 							} else if (isBlackchar(c)){
 								thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6, "CANH BAO",
-								"KI TU VUA NHAP KHONG DUOC CHO PHEP!", VTFORMLENGTH-2, YELLOW, RED);
+								"KI TU VUA NHAP KHONG DUOC CHO PHEP!", VTFORMLENGTH-2, LIGHT_BLUE, RED);
 								VatTuTable(XTABLE, YTABLE, arr, page);
 							} else if (c==SPACE) {
 								thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6, "CANH BAO",
-								"MAVATTU KHONG NHAP KHOANG TRANG!", VTFORMLENGTH-2, YELLOW, RED);
+								"MAVATTU KHONG NHAP KHOANG TRANG!", VTFORMLENGTH-2, LIGHT_BLUE, RED);
 								VatTuTable(XTABLE, YTABLE, arr, page);
 							}
 							continue;
@@ -429,7 +426,7 @@ void addVatTuForm(int xform, int yform, PTRVatTu &root, int page){
 								cout<<char(toupper(c)); x++;	
 							} else {
 								thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6, "CANH BAO",
-								"KI TU VUA NHAP KHONG DUOC CHO PHEP!", VTFORMLENGTH-2, YELLOW, RED);
+								"KI TU VUA NHAP KHONG DUOC CHO PHEP!", VTFORMLENGTH-2, LIGHT_BLUE, RED);
 								VatTuTable(XTABLE, YTABLE, arr, page);
 							}
 							continue;
@@ -439,7 +436,7 @@ void addVatTuForm(int xform, int yform, PTRVatTu &root, int page){
 								cout<<c; x++;
 							} else {
 								thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6, "CANH BAO",
-								"CHI NHAP SO NGUYEN KHONG DAU", VTFORMLENGTH-2, YELLOW, RED);
+								"CHI NHAP SO NGUYEN KHONG DAU", VTFORMLENGTH-2, LIGHT_BLUE, RED);
 								VatTuTable(XTABLE, YTABLE, arr, page);
 							}
 							continue;
@@ -487,7 +484,7 @@ void editVatTuForm(int xform, int yform, PTRVatTu &root, int page, int xtable, i
 				case KEY_UP:{
 					if(line==2) {
 						thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6, "CANH BAO",
-						"KHONG DUOC SU MA VAT TU", VTFORMLENGTH-2, YELLOW, RED);
+						"KHONG DUOC SU MA VAT TU", VTFORMLENGTH-2, LIGHT_BLUE, RED);
 						VatTuTable(XTABLE, YTABLE, arr, page);
 						continue;
 					}
@@ -556,7 +553,7 @@ void editVatTuForm(int xform, int yform, PTRVatTu &root, int page, int xtable, i
 						trim(str);
 						if (str.length()>MAX_DVT){
 							thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6, "CANH BAO",
-							"DON VI TINH KHONG QUA 10 KI TU!", VTFORMLENGTH-2, YELLOW, RED);
+							"DON VI TINH KHONG QUA 10 KI TU!", VTFORMLENGTH-2, YELLOW, LIGHT_RED);
 							VatTuTable(XTABLE, YTABLE, arr, page);
 							continue;
 						}
@@ -572,7 +569,7 @@ void editVatTuForm(int xform, int yform, PTRVatTu &root, int page, int xtable, i
 							return;
 						}else{
 							thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6, "THAT BAI",
-							"VAT TU CHUA DUOC SUA, HAY KIEM TRA LAI!", VTFORMLENGTH-2, YELLOW, RED);
+							"VAT TU CHUA DUOC SUA, HAY KIEM TRA LAI!", VTFORMLENGTH-2, YELLOW, LIGHT_RED);
 							VatTuTable(XTABLE, YTABLE, arr, page);
 							continue;
 						}
@@ -587,14 +584,14 @@ void editVatTuForm(int xform, int yform, PTRVatTu &root, int page, int xtable, i
 								cout<<char(toupper(c)); x++;	
 							} else {
 								thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6, "CANH BAO",
-								"KI TU VUA NHAP KHONG DUOC CHO PHEP!", VTFORMLENGTH-2, YELLOW, RED);
+								"KI TU VUA NHAP KHONG DUOC CHO PHEP!", VTFORMLENGTH-2, LIGHT_BLUE, RED);
 								VatTuTable(XTABLE, YTABLE, arr, page);
 							}
 							continue;
 						}
 						case 4:{
 							thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6, "CANH BAO",
-							"KHONG DUOC CHINH SUA O NAY", VTFORMLENGTH-2, YELLOW, RED);
+							"KHONG DUOC CHINH SUA O NAY", VTFORMLENGTH-2, LIGHT_BLUE, RED);
 							VatTuTable(XTABLE, YTABLE, arr, page);
 							continue;
 						}
@@ -603,68 +600,5 @@ void editVatTuForm(int xform, int yform, PTRVatTu &root, int page, int xtable, i
 					continue;
 				}
 			}
-	}
-};
-void timkiem(PTRVatTu head){
-	string str = searchBox(XTABLE, YTABLE+6, VTTABLELENGTH, "NHAP SO HD");
-	if(str=="") return;
-	char maVT[MAX_MAVT]; strcpy(maVT, str.c_str());
-	PTRVatTu node = Search(head, maVT);
-	if(node==NULL){
-		thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6, "CANH BAO",
-		"KHONG TIM THAY HOA DON!", VTFORMLENGTH-2, YELLOW, RED);
-		return;
-	}
-	mangVatTu arr;
-	add(arr, node);
-	char c;
-	int line = 0, page = 1;
-	int y = YTABLE + 2, x = XTABLE+1;
-	VatTuTable(XTABLE, YTABLE, arr, page);
-	highlight(x, y, VTTABLELENGTH, YELLOW);
-	while (true){
-		gotoxy(155,42); cout<<"line: "<<line;
-		c=_getch();
-		switch(c){
-			case ENTER: {
-				highlight(x, y, VTTABLELENGTH, BLACK);
-				editVatTuForm(XTABLE + VTTABLELENGTH + 4, YTABLE2, head, page, XTABLE + 1, YTABLE + 2, line);
-				return;
-			}
-			case CTRL_N:{
-				highlight(x, y, VTTABLELENGTH, BLACK);
-				addVatTuForm(XTABLE + VTTABLELENGTH + 4, YTABLE2, head, page);
-				return;
-			}
-			case 8:{
-				string str = getMaVTTable(XTABLE + 1, YTABLE + 2, line);
-				char mavt[11];
-				strcpy(mavt, str.c_str());
-				ListNhanVien list;
-				readFileNV(list, DEFAULT_NVFILE);
-				CT_HD ct = getCT_HD(list, mavt);
-				free(list);
-				if(ct.soluong!=0) {
-					thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6,"CANH BAO",
-					"VAT TU DA DUOC LAP HOA DON, KHONG DUOC QUYEN XOA!", VTFORMLENGTH-2, YELLOW, RED);
-				}
-				else if(luachon(XTABLE + VTTABLELENGTH + 2, MAXROW-6,
-				"Ban chac chan muon xoa?", VTFORMLENGTH-2)==1){					
-					remove(head, mavt);
-					removeMang(arr);
-					ListToArray(head, arr);
-					thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6,"THANH CONG",
-					"VAT TU DA DUOC XOA!", VTFORMLENGTH-2, BLUE, LIGHT_GREEN);
-				}
-				VatTuTable(XTABLE, YTABLE, arr, page);
-				continue;
-			}
-			case CTRL_F:{
-				thongbao(XTABLE + VTTABLELENGTH + 2, MAXROW-6,"THONG BAO",
-				"VUI LONG ESC DE THOAT CHUC NANG TIM KIEM TRUOC", VTFORMLENGTH-2, YELLOW, RED);
-				continue;
-			}
-			case ESC: return;
-		}
 	}
 };

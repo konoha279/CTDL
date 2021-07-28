@@ -11,13 +11,13 @@ using namespace std;
 string tkHeader1[] = {" SODH ", " NGAY LAP ", " LOAI ", " HO TEN NV LAP ", " TRI GIA "};
 string tkHeader2[] = {" STT ", " MA VAT TU ", " TEN VAT TU ", " DOANH THU "};
 //=====Ten Ham=====//
-int ThongKeMenu(const ListNhanVien &list, const PTRVatTu &head);
+int ThongKeMenu();
 void ThongKeView();
-void ThongKe1Table(int x, int y, const Listdata1 &list, const Date &date1, const Date &date2,int page);
+void ThongKe1Table(int x, int y, const Listdata1 &list, const Date &date1, const Date &date2, int page);
 void ThongKe2Table(int x, int y, const Listdata2 &list);
 int NhapNgay(Date &date1, Date &date2);
 //=====Noi dung=====//
-int ThongKeMenu(const ListNhanVien &list, const PTRVatTu &head){
+int ThongKeMenu(){
 	Listdata1 list1; 
 	Listdata2 list2;
 	Date date1;
@@ -26,7 +26,7 @@ int ThongKeMenu(const ListNhanVien &list, const PTRVatTu &head){
 	char c;
 	int chedo = 0, page=1;
 	if (!NhapNgay(date1, date2)) return 0;
-	xuli(list1, list2, date1, date2, list, head);
+	xuli(list1, list2, date1, date2);
 	ThongKe1Table(XTABLE, YDATE+4, list1, date1, date2, page);
 	while (true){
 		gotoxy(MAXLINE-10, MAXROW-6); cout<<"list1.n="<<list1.n<<" list2.n="<<list2.n;
@@ -68,7 +68,7 @@ int ThongKeMenu(const ListNhanVien &list, const PTRVatTu &head){
 			}
 			case CTRL_F:{
 				if (!NhapNgay(date1, date2)) continue;
-				xuli(list1, list2, date1, date2, list, head);
+				xuli(list1, list2, date1, date2);
 				chedo=0; page=1;
 				ThongKe1Table(XTABLE, YDATE+4, list1, date1, date2, page);
 				continue;
@@ -83,7 +83,7 @@ void ThongKeView(){
 	clrscr();
 	resizeConsole(WIDTH, HEIGHT);
 	string title = "TRANG THONG KE";
-	CreateBox(XTABLE, 1, "", TKTABLELENGTH + TKFORMLENGTH+2);
+	CreateBox(XTABLE, 1, "", TKTABLELENGTH + TKFORMLENGTH);
 	gotoxy(XTABLE + (TKTABLELENGTH + TKFORMLENGTH - title.length())/2, 1); cout<<title;
 	gotoxy(XDATE1, YDATE-2); cout<<"TU NGAY:";
 	gotoxy(XDATE2, YDATE-2); cout<<"DEN NGAY:";

@@ -4,47 +4,31 @@
 #include <ctime>
 #include <cstdlib>
 #include <thread>
-using namespace std;
-void init(ListNhanVien &list, PTRVatTu &head);
-int Random(int min, int max);
-int Random(int min, int max){ 
+int Random(int min, int max)
+{ 
     if(min >= max)
         return 0;
     int d = max - min;
     return (rand() % (d+1) + min);
-};
-void init(ListNhanVien &list, PTRVatTu &head){
-	string str = "LOI DOC FILE ";
-	if (!readFileNV(list, DEFAULT_NVFILE)) {
-		str+="NHAN VIEN";
-		thongbao((MAXLINE-str.length())/2, MAXROW/2-1, "CANH BAO", str, str.length(), YELLOW, RED);
-	}
-	if(!ReadFile(head)){
-		str+="VAT TU";
-		thongbao((MAXLINE-str.length())/2, MAXROW/2-1, "CANH BAO", str, str.length(), YELLOW, RED);
-	}
-};
+}
 int main(){
-	ListNhanVien list;
-	PTRVatTu head = NULL;
 	Cursor(false, 100);
-	init(list, head);
 	while (true){
 		switch (mainMenu()){
 			case 1: {
-				VatTuMenu(head);
+				VatTuMenu();
 				continue;
 			}
 			case 2: {
-				NhanVienMenu(list);
+				NhanVienMenu();
 				continue;
 			}
 			case 3:{
-				HoaDonMenu(list, head);
+				HoaDonMenu();
 				continue;
 			}
 			case 4:{
-				ThongKeMenu(list, head);
+				ThongKeMenu();
 				continue;
 			}
 			case 5: return 0;

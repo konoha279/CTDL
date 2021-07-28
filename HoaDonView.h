@@ -5,8 +5,6 @@
 #define HDFORMLENGTH 40
 #define CTTABLELENGTH 36
 #define CTFORMLENGTH 42
-#define CTFORMINPUT_X 108
-#define CTFORMINPUT_Y 24
 #define STT 3
 #define TENVATTU 50
 #define SOLUONG 10
@@ -48,18 +46,16 @@ void nhapNgay();
 //bang hoa don
 void HoaDonTable(int x, int y, const ListNhanVien &list, int page);
 //menu HoaDon
-int HoaDonMenu(ListNhanVien &list, PTRVatTu &head);
+int HoaDonMenu();
 //HoaDon view
 void HoaDonView(const ListNhanVien &list, int page);
 //HoaDon form
 void HoaDonForm(int x, int y);
 void showListHoaDon(int x, int y, ListHoaDon list, int page, int row);
 void showListHoaDon(int x, int y, ListNhanVien list, int page, int index);
-void addHoaDonForm(int defaultx, int defaulty, ListNhanVien &list, PTRVatTu &root,int soHD, int page);
+void addHoaDonForm(int defaultx, int defaulty, ListNhanVien &list, int soHD, int page);
 void printHD(int x, int y, NhanVien nv, char soHD[], PTRVatTu root);
 //=====CT_HD=====//
-int nhapCT(int xx, int yy, Info &info,string maVT, string strSoLuongTon);
-int chinhSuaCT(int xCT, int yCT, Info &info, PTRVatTu root);
 void CT_HDTable(int x, int y, ListCT_HD list);
 int addCT_HDMenu(Info &info);
 void addCT_HDView(const Info &info, const mangVatTu &arr, int page);
@@ -121,12 +117,15 @@ int countHoaDon(ListNhanVien list){
     count+=list.nhanViens[i]->hoaDons->n;
   return count;
 };
-int HoaDonMenu(ListNhanVien &list, PTRVatTu &head){
+int HoaDonMenu(){
+	ListNhanVien list;
 	NhanVien nv;
 	string strSearch;
+	if(!readFileNV(list, DEFAULT_NVFILE)) cout<<"Loi doc file!";
+	PTRVatTu head = NULL;
+	ReadFile(head);
 	char c, cSearch[21];
 	string str;
-	int i;
 	int line = 0, page = 1;
 	int y = YTABLE + 2, x = XTABLE+1;
 	HoaDonView(list, page);
@@ -173,70 +172,28 @@ int HoaDonMenu(ListNhanVien &list, PTRVatTu &head){
 				highlight(x, y, HDTABLELENGTH, YELLOW);
 				continue;
 			}
-			case ENTER:{
-				strSearch = "";
-				y = YTABLE + 2 + line;
-				for(i = 0; i < MAX_SOHD; i++){
-					c = readChar(XTABLE+2+i,y);
-					if(c == SPACE) break;
-					strSearch += c;
-				}
-				strcpy(cSearch,strSearch.c_str());
-				nv = getNV(list,cSearch);
-                printHD(XTABLE,YTABLE,nv,cSearch,head);
-                clrscr;
-                page = 1;
-                HoaDonView(list, page);
-                highlight(x, y, HDTABLELENGTH, YELLOW);
-                continue;
-			}
+			case ENTER: return line;
 			case CTRL_N:{
 				int soHD = countHoaDon(list);
-				addHoaDonForm(XTABLE + HDFORMLENGTH + 55, YTABLE2, list, head, soHD, page);
+				addHoaDonForm(XTABLE + HDFORMLENGTH + 55, YTABLE2, list, soHD, page);
 				continue;
 			}
 			case CTRL_F:{
-				y = YTABLE + 2 + line;
                 strSearch = searchBox(XTABLE + HDTABLELENGTH + 3 + HDFORMLENGTH + 3,  YTABLE+6, HDFORMLENGTH-3, "NHAP SODH");
                 strcpy(cSearch, strSearch.c_str());
                 nv = getNV(list,cSearch);
                 if(nv.maNV == -1){
                     thongbao(XTABLE + HDTABLELENGTH + 3 + HDFORMLENGTH + 3, YTABLE+12, "CANH BAO",
-                    "KHONG DUOC TIM THAY HOA DON NAY!", HDFORMLENGTH-2, YELLOW, RED);
+                    "KHONG DUOC TIM THAY HOA DON NAY!", HDFORMLENGTH-2, BLUE, RED);
                     continue;
                 }
                 printHD(XTABLE,YTABLE,nv,cSearch,head);
                 clrscr;
                 page = 1;
                 HoaDonView(list, page);
-                highlight(x, y, HDTABLELENGTH, YELLOW);
+                highlight(XTABLE+1, YTABLE+2, HDTABLELENGTH, YELLOW);
                 continue;
             }
-            case CTRL_S:{
-            	if (luachon(XTABLE + HDTABLELENGTH + 3 + HDFORMLENGTH + 3, YTABLE+12,
-                "Neu save file, du lieu hien tai khong the sua, ban chac chan muon save file?", 80)==1){
-					writeFileNV(list, DEFAULT_NVFILE);
-					InFile(head);
-					thongbao(XTABLE + HDTABLELENGTH + 3 + HDFORMLENGTH + 3, YTABLE+12, "THANH CONG",
-                    "FILE DA DUOC SAVE!", HDFORMLENGTH-2, BLUE, LIGHT_GREEN);
-				}
-				HoaDonTable(XTABLE, YTABLE, list, page);
-				continue;
-			}
-			case CTRL_L:{
-				if (luachon(XTABLE + HDTABLELENGTH + 3 + HDFORMLENGTH + 3, YTABLE+12,
-                "Neu save file, du lieu hien tai khong the sua, ban chac chan muon save file?", 80)==1){
-                	free(list);
-                	freePTRVatTu(head);
-                	head=NULL;
-                	ReadFile(head);
-                	readFileNV(list, DEFAULT_NVFILE);
-                	thongbao(XTABLE + HDTABLELENGTH + 3 + HDFORMLENGTH + 3, YTABLE+12, "THANH CONG",
-                    "FILE DA DUOC LOAD!", HDFORMLENGTH-2, BLUE, LIGHT_GREEN);
-                }
-                HoaDonTable(XTABLE, YTABLE, list, page);
-				continue;
-			}
 			case ESC: return -1;
 		}
 	}
@@ -278,7 +235,7 @@ void HoaDonTable(int x, int y, const ListNhanVien &list, int page){
 	cout << setw(3 + MAX_LOAI) << setfill(char(205)) << char(187);
 	//header
 	gotoxy(x,y);
-	cout << char(186) << setw(14 + MAX_SOHD - hdHeader[0].length()) << setfill(' ') << hdHeader[0] << char(186);
+	cout << char(186) << setw(8 + MAX_SOHD - hdHeader[0].length()) << setfill(' ') << hdHeader[0] << char(186);
 	cout << hdHeader[1] << setw(3 + MAX_MANV - hdHeader[1].length()) << setfill(' ') << char(186);
 	cout << hdHeader[2] << setw(3 + MAX_HO + 1 + MAX_TEN - hdHeader[2].length()) << setfill(' ') << char(186);
 	cout << hdHeader[3] << setw(3 + MAX_NGAYLAP - hdHeader[3].length()) << setfill(' ') << char(186);
@@ -390,27 +347,20 @@ void showListHoaDon(int x, int y, ListNhanVien list, int page, int index){
         }
     }
 };
-void addHoaDonForm(int defaultx, int defaulty, ListNhanVien &list, PTRVatTu &root, int soHD, int page){
-	char c, loai, key;
-	PTRVatTu vt;
-	int xx = defaultx + 17, yy = defaulty + 5;
-	int n, pageNV = 1;
-	int maNV;
+void addHoaDonForm(int defaultx, int defaulty, ListNhanVien &list, int soHD, int page){
+	char c;
+	int xx=defaultx+17, yy=defaulty+5;
+	int n,pageNV=1;
 	if(list.n%MAXTABLEROW==0) n=list.n/MAXTABLEROW;
-	else n = list.n/MAXTABLEROW+1;
+	else n=list.n/MAXTABLEROW+1;
 	int line = 2;
-	string str = "";
-	string p = "TRANG: ";
-	Date date;
-	Info info;
 	int tongPage = countHoaDon(list);
 	if(tongPage%MAXTABLEROW==0) tongPage=list.n/MAXTABLEROW;
-	else tongPage = tongPage/MAXTABLEROW+1;
+	else tongPage=tongPage/MAXTABLEROW+1;
 	Date d1 = getDateNow(); //lay ngay hien tai
 	string strDate = convertDateToString(d1);
 	//Lay tao do o thu nhat
 	int x = defaultx + 17, y = defaulty + 2;
-	int cheDo = 1;
 	gotoxy(x, y);
 	cout << "HD" << soHD+1;
 	gotoxy(x,y+6);
@@ -497,14 +447,15 @@ void addHoaDonForm(int defaultx, int defaulty, ListNhanVien &list, PTRVatTu &roo
 				}
 				case ESC:{
 					HoaDonForm(defaultx+2,defaulty);
-					Cursor(false,100);
 					return;
 				}
 				case ENTER: {
 					if (line==5) {
+						string str = "";
+						string p = "TRANG: ";
 						p += to_string(page)+ "/" + to_string(tongPage);
-						int i;
-						str = "";
+						Date date;
+						int maNV, i;
 						for (i=0; i<32 && readChar(xx+i,yy) != SPACE; i++) 
 							str += readChar(xx+i,yy);
 						maNV = atoi(str.c_str());
@@ -553,51 +504,33 @@ void addHoaDonForm(int defaultx, int defaulty, ListNhanVien &list, PTRVatTu &roo
 								gotoxy(xx,yy+3);
 							}
 						}
-						loai = readChar(xx,yy+6);
+						char loai = readChar(xx,yy+6);
 						if(loai == SPACE){
 							thongbao(XTABLE + HDTABLELENGTH + 15, MAXROW-5, "CANH BAO",
 							"KHONG DUOC DE TRONG LOAI!", HDFORMLENGTH-2, BLUE, RED);
 							CreateBox(xx-3, yy+12, p, 11);
 							continue;
 						}
+						Info info;
 						str = "HD" + to_string(soHD+1);
 						strcpy(info.soHD, str.c_str());
 						info.ngayLap = date;
 						info.loai = loai;
-						info.listct = new ListCT_HD;
 						if (addCT_HDMenu(info)==1){
 							NhanVien nv = get(list, maNV);
 							addTail(*nv.hoaDons, info);
-							if(info.loai == 'X') cheDo = -1;
-							for(i = 0; i < info.listct->n; i++){
-								vt = Search(root, info.listct->ct[i].maVT);
-								vt->vatTu.soLuongTon += cheDo*info.listct->ct[i].soluong;
-							}							
+							writeFileNV(list, DEFAULT_NVFILE);
 						}
-						HoaDonView(list, page);
-						return;
 					}
 					continue;
 				}
 				case TAB:{
+					char key;					
 					switch (line){
 						case 2:{
-							cout << "   ";
-							x = xx;
-							gotoxy(xx,yy);
 							while(1){
-								key = _getch();
-								if(key == ENTER){
-									x = xx;
-									break;
-								}
-								if(key == ESC){
-									gotoxy(xx,yy);
-									cout << "   ";
-									x = xx;
-									gotoxy(xx,yy);
-									continue;
-								}
+								key=_getch();
+								if(key == ENTER) break;
 								if(key == BACKSPACE) {
 									if(x == (defaultx + 17)) continue;
 									x--;
@@ -606,11 +539,11 @@ void addHoaDonForm(int defaultx, int defaulty, ListNhanVien &list, PTRVatTu &roo
 									gotoxy(x,y);
 									continue;
 								}
-								if(x == (defaultx+20)) continue;							
+								if(x == (defaultx+20)) continue;
 								if(key >= 48 && key <= 57){
-				                	cout << key;
-				                	if(x == (defaultx+20)) continue;
-									x++;
+					                	cout << key;
+					                	if(x == (defaultx+20)) continue;
+										x++;
 								}
 							}
 							break;
@@ -627,7 +560,7 @@ void addHoaDonForm(int defaultx, int defaulty, ListNhanVien &list, PTRVatTu &roo
 	}
 };
 void printHD(int x, int y, NhanVien nv, char soHD[], PTRVatTu root){
-	y += 2;
+	y+=2;
 	char key;
 	int i;
 	HoaDon hd;
@@ -778,241 +711,13 @@ void CT_HDTable(int x, int y, ListCT_HD list){
 		gotoxy(x+2+MAX_MAVT+3+MAX_SL+3+MAX_DONGIA+3, y+2+i); cout<<toString(list.ct[i].VAT, MAX_VAT);
 	}
 };
-int nhapCT(int xx, int yy, Info &info, string maVT, string strSoLuongTon){
-	char key, c;
-	CT_HD ct;
-	float VAT;
-	int i, donGia, soLuong, soLuongTon = atoi(strSoLuongTon.c_str());
-	string strDonGia = "", strSoLuong = "", strVAT = "";
-	gotoxy(CTFORMINPUT_X,CTFORMINPUT_Y);
-	cout << maVT;
-	gotoxy(CTFORMINPUT_X,CTFORMINPUT_Y+3);
-	yy = CTFORMINPUT_Y+3;
-	while(true){
-		Cursor(true,100);
-		key = _getch();
-		switch(key){
-			case KEY_UP:{
-				if(yy == CTFORMINPUT_Y+3) continue;
-				xx == CTFORMINPUT_X;
-				yy -= 3;
-				gotoxy(xx, yy);
-				continue;
-			}
-			case KEY_DOWN:{
-				if(yy == CTFORMINPUT_Y+12) continue;
-				xx == CTFORMINPUT_X;
-				yy += 3;
-				gotoxy(xx, yy);
-				continue;
-			}
-			case TAB:{
-				if(yy == CTFORMINPUT_Y+12) continue;
-				cout<<" "<<setw(24)<<setfill(' ')<<" ";
-				gotoxy(xx,yy);
-				while(true){
-					key = _getch();
-					if(key == ENTER){
-						gotoxy(CTFORMINPUT_X, yy);
-						xx = CTFORMINPUT_X;
-						break;
-					}
-					if(key == BACKSPACE) {
-						if(xx == CTFORMINPUT_X) continue;
-						xx--;
-						gotoxy(xx,yy);
-						cout << " ";
-						gotoxy(xx,yy);
-						continue;
-					}
-					if(xx == (CTFORMINPUT_X+26)) continue;							
-					if(key >= 48 && key <= 57){
-						cout << key;
-						xx++;
-						continue;
-					}
-				}
-				continue;
-			}
-			case ESC:{
-				Cursor(false,100);
-				CT_HDForm(XTABLE+VTTABLELENGTH+2, YTABLE2);
-				return 0;
-			}
-			case ENTER:{				
-				if(yy == CTFORMINPUT_Y+12){
-					i = 0;
-					strDonGia = "";
-					strSoLuong = "";
-					strVAT = "";
-					do{						
-						c = readChar(xx+i,yy-9);
-						if(c == SPACE) break;
-						strDonGia += c;
-						i++;
-					}while(1);
-					i = 0;
-					do{
-						c = readChar(xx+i,yy-6);
-						if(c == SPACE) break;
-						strSoLuong += c;
-						i++;
-					}while(1);
-					i = 0;
-					do{
-						c = readChar(xx+i,yy-3);
-						if(c == SPACE) break;
-						strVAT += c;
-						i++;
-					}while(1);
-					donGia = atoi(strDonGia.c_str());
-					soLuong = atoi(strSoLuong.c_str());
-					VAT = atof(strVAT.c_str());
-					if(strDonGia == "") {
-						thongbao(xx, yy+3, "CANH BAO",
-						"KHONG DUOC DE TRONG DON GIA!", HDFORMLENGTH-2, BLUE, RED);
-						gotoxy(xx,yy);
-						Cursor(true,100);
-						continue;
-					}
-					if(strSoLuong == "") {
-						thongbao(xx, yy+3, "CANH BAO",
-						"KHONG DUOC DE TRONG SOLUONG!", HDFORMLENGTH-2, BLUE, RED);
-						gotoxy(xx,yy);
-						Cursor(true,100);
-						continue;
-					}
-					if(strVAT == "") {
-						thongbao(xx, yy+3, "CANH BAO",
-						"KHONG DUOC DE TRONG VAT!", HDFORMLENGTH-2, BLUE, RED);
-						gotoxy(xx,yy);
-						Cursor(true,100);
-						continue;
-					}
-					if(donGia == 0) {
-						thongbao(xx, yy+3, "CANH BAO",
-						"DON GIA PHAI LON HON 0!", HDFORMLENGTH-2, BLUE, RED);
-						gotoxy(xx,yy);
-						Cursor(true,100);
-						continue;
-					}
-					if(soLuong == 0) {
-						thongbao(xx, yy+3, "CANH BAO",
-						"SO LUONG PHAI LON HON 0!", HDFORMLENGTH-2, BLUE, RED);
-						gotoxy(xx,yy);
-						Cursor(true,100);
-						continue;
-					}
-					if(info.loai == 'X' && soLuong > soLuongTon) {
-						string tb[] = {"SO LUONG TON KHONG DU!", "SO LUONG TON HIEN TAI: "+strSoLuongTon};
-						thongbao(xx,yy+3,"CANH BAO",tb,2,50,BLUE, RED);
-						gotoxy(xx,yy);
-						Cursor(true,100);
-						continue;
-					}
-					if(info.listct->n == 20){
-						thongbao(xx, yy+3, "CANH BAO",
-						"DA DAY DANH SACH VAT TU!", HDFORMLENGTH-2, BLUE, RED);
-						CT_HDForm(XTABLE+VTTABLELENGTH+2, YTABLE2);
-						return 0; // 0 la day khong the them
-					}
-					else{
-						for(i = 0; i < info.listct->n && strcmp(info.listct->ct[i].maVT, maVT.c_str()) != 0; i++);
-						ct = createCT_HD(maVT, soLuong, donGia, float(VAT));
-						info.listct->ct[i] = ct;
-						if(i == info.listct->n) info.listct->n++;
-						CT_HDForm(XTABLE+VTTABLELENGTH+2, YTABLE2);
-						return 1; // 1 la them thanh cong
-					}					
-				}
-				continue;
-			}
-		}
-	}
-};
-int chinhSuaCT(int xCT, int yCT, Info &info, PTRVatTu root){
-	char key;
-	int line = 1;
-	int x = xCT, y = yCT;
-	int luaChon,i;
-	int soLuongCT = info.listct->n;
-	string tb, strMaVT, strSoLuongTon;
-	PTRVatTu vt;
-	while(true){
-		Cursor(false,100);
-		key = _getch();
-		switch(key){
-			case KEY_UP:{
-				if (line == 1) continue;
-				y = yCT + line - 1;
-				highlight(x, y, CTTABLELENGTH, BLACK);
-				highlight(x, y - 1, CTTABLELENGTH, YELLOW);
-				line--;
-				continue;
-			}
-			case KEY_DOWN:{
-				if (line == 20 || line ==  soLuongCT) continue;
-				y = yCT + line - 1;
-				highlight(x, y, CTTABLELENGTH, BLACK);
-				highlight(x, y + 1, CTTABLELENGTH, YELLOW);
-				line++;
-				continue;
-			}
-			case BACKSPACE:{
-				tb = "BAN CO THUC SU MUON XOA";
-				luaChon = luachon(CTFORMINPUT_X, CTFORMINPUT_Y+15, tb, tb.length());
-				if(luaChon == 1){
-					if(soLuongCT == 1){
-						info.listct->n--;
-						soLuongCT--;
-						y = yCT + line - 1;
-						highlight(x, y, CTTABLELENGTH, BLACK);
-						CT_HDTable(XTABLE+VTTABLELENGTH+2+CTFORMLENGTH+2, YTABLE, *info.listct);
-						return 0;
-					}
-					for(i = line; i < soLuongCT; i++)
-						info.listct->ct[i-1] = info.listct->ct[i];
-					info.listct->n--;
-					soLuongCT--;
-					line = 1;
-					y = yCT;
-					CT_HDTable(XTABLE+VTTABLELENGTH+2+CTFORMLENGTH+2, YTABLE, *info.listct);
-					highlight(x, y, CTTABLELENGTH, YELLOW);
-				}
-				continue;
-			}
-			case ENTER:{
-				strMaVT = info.listct->ct[line-1].maVT;
-				vt = Search(root, info.listct->ct[line-1].maVT);
-				strSoLuongTon = to_string(vt->vatTu.soLuongTon);
-				if(nhapCT(CTFORMINPUT_X, CTFORMINPUT_Y, info, strMaVT, strSoLuongTon) == 1){
-					//in ra CT
-					y = yCT;
-					CT_HDTable(XTABLE+VTTABLELENGTH+2+CTFORMLENGTH+2, YTABLE, *info.listct);
-					highlight(x, y, CTTABLELENGTH, YELLOW);
-				}
-				continue;
-			}
-			case TAB:{
-				y = yCT + line - 1;
-				highlight(x, y, CTTABLELENGTH, BLACK);
-				return 0;
-			}
-		}
-	}
-};
 int addCT_HDMenu(Info &info){
-	string str = "",soLuongTon,tb;
 	PTRVatTu head = NULL;
 	ReadFile(head);
 	mangVatTu arr; ListToArray(head, arr);
-	char c,key;
-	char maVT[11];
-	int i;
-	int xx = CTFORMINPUT_X, yy = CTFORMINPUT_Y;
-	int line = 0, page = 1, luaChon;
-	int y = YTABLE + 2, x = 2;
-	int xCT = XTABLE+VTTABLELENGTH+CTFORMLENGTH+5, yCT = y;
+	char c;
+	int line = 0, page = 1, chedo=0;
+	int y = YTABLE + 2, x = 1+1;
 	addCT_HDView(info, arr, page);
 	highlight(x, y, VTTABLELENGTH, YELLOW);
 	while (true){
@@ -1020,98 +725,10 @@ int addCT_HDMenu(Info &info){
 		gotoxy(155,41); cout<<"size: "<<sizeVatTu;
 		gotoxy(155,42); cout<<"line: "<<line;
 		gotoxy(155,43); cout<<"page: "<<page;
-		key = _getch();
-		switch(key){
-			case KEY_UP:{
-				if (line == 0) continue;
-				y = YTABLE + 2 + line;
-				highlight(x, y, VTTABLELENGTH, BLACK);
-				highlight(x, y-1, VTTABLELENGTH, YELLOW);
-				line--;
-				continue;
-			}
-			case KEY_DOWN:{
-				if (line == 29 || line == sizeVatTu-1) continue;
-				y = YTABLE + 2 + line;
-				highlight(x, y, VTTABLELENGTH, BLACK);
-				highlight(x, y+1, VTTABLELENGTH, YELLOW);
-				line++;
-				continue;
-			}
-			case PAGE_DOWN:{
-				int n;
-				if(sizeVatTu%MAXTABLEROW==0) n=sizeVatTu/MAXTABLEROW;
-				else n=sizeVatTu/MAXTABLEROW+1;
-				if (page+1>n) continue;
-				page++;
-				VatTuTable(XTABLE, YTABLE, arr, page);
-				highlight(x, y, VTTABLELENGTH, BLACK);
-				line = 0; y = YTABLE + 2;
-				highlight(x, y, VTTABLELENGTH, YELLOW);
-				continue;
-			}
-			case PAGE_UP:{
-				if(page==1) continue;
-				page--;
-				VatTuTable(XTABLE, YTABLE, arr, page);
-				highlight(x, y, VTTABLELENGTH, BLACK);
-				line = 0; y = YTABLE + 2;
-				highlight(x, y, VTTABLELENGTH, YELLOW);
-				continue;
-			}
-			case TAB: {
-				// nhap xong CT quay lai de luu vao nhan vien
-				if(info.listct->n == 0) continue;
-				y = YTABLE + 2 + line;
-				highlight(x, y, VTTABLELENGTH, BLACK);
-				highlight(xCT, yCT, CTTABLELENGTH, YELLOW);
-				chinhSuaCT(xCT, yCT, info, head);
-				highlight(x, y, VTTABLELENGTH, YELLOW);
-				continue;
-			}
-			case ENTER:{
-				str = "";
-				for(i = 1; i < 11 ; i++){
-					c = readChar(x+i,YTABLE + 2 + line);
-					if(c == SPACE) break;
-					str += c;
-				}
-				strcpy(maVT,str.c_str());
-				for(i = 0; i < info.listct->n; i++)
-					if(!strcmp(info.listct->ct[i].maVT,maVT)){
-						thongbao(xx, CTFORMINPUT_Y+15, "CANH BAO",
-						"DA TRUNG VAT TU TRONG CHI TIET!", HDFORMLENGTH-2, BLUE, RED);
-						break;
-					}
-				if(i != info.listct->n) continue;
-				soLuongTon = "";
-				for(i = 0; i < 12 ; i++){
-					c = readChar(x+MAX_MAVT+MAX_TENVT+MAX_DVT+9+i,YTABLE + 2 + line);
-					soLuongTon += c;
-				}
-				trim(soLuongTon);
-				if(nhapCT(xx, yy, info, str, soLuongTon) == 1){
-					//in ra CT
-					CT_HDTable(XTABLE+VTTABLELENGTH+2+CTFORMLENGTH+2, YTABLE, *info.listct);
-				}
-				continue;
-			}
-			case ESC: {
-				// nhap xong CT quay lai de luu vao nhan vien
-				tb = "BAN CO THUC SU MUON THOAT?";
-				luaChon = luachon(xx, CTFORMINPUT_Y+15, tb, tb.length());
-				if(luaChon == 1){
-					if(info.listct->n == 0){
-						tb = "HOA DON DANG TRONG! BAN MUON THOAT KHONG?";
-						if (luachon(xx, CTFORMINPUT_Y+15, tb, tb.length())==1) return 0;
-						continue;
-					}
-					tb = "BAN CO MUON LUU HOA DON NAY?";
-					if (luachon(xx, CTFORMINPUT_Y+15, tb, tb.length())==1) return 1;
-					return 0;
-				}
-				continue;
-			}
+		c=_getch();
+		switch(c){
+			case ENTER: return line;
+			case ESC: return 0;
 		}
 	}
 	return 1;
@@ -1136,12 +753,16 @@ void addCT_HDView(const Info &info, const mangVatTu &arr, int page){
 	tenbang = "|| DANH SACH CHI TIET TUONG UNG ||";
 	gotoxy(XTABLE + VTTABLELENGTH + 2 + CTFORMLENGTH + 2 + (CTTABLELENGTH + 2 - tenbang.length())/2, YTABLE-2); 
 	cout<<tenbang;
-	CT_HDTable(XTABLE+VTTABLELENGTH+2+CTFORMLENGTH+2, YTABLE, *info.listct);
+	CT_HDTable(XTABLE+VTTABLELENGTH+2+CTFORMLENGTH+2, YTABLE, *info.	listct);
 };
 void CT_HDForm(int x, int y){
 	if(x<0||y<1) return ;
 	//xoa vung
 	int i;
+	for (i=0; i<MAXTABLEROW/2+2; i++){
+		gotoxy(x, y-1+i);
+		cout<<" "<<setw(CTFORMLENGTH+3)<<setfill(' ')<<" ";
+	}
 	//vien tren
 	gotoxy(x,y-1);
 	cout << char(201) << setw(CTFORMLENGTH+1) << setfill(char(205)) << char(187);
@@ -1160,6 +781,6 @@ void CT_HDForm(int x, int y){
 	gotoxy(x+3, y+5); cout<<"DONGIA:";
 	gotoxy(x+3, y+8); cout<<"SOLUONG:";
 	gotoxy(x+3, y+11); cout<<"%VAT:";
-	for (i=0; i<4; i++) CreateBox(x+13, y+2+i*3, " ", 27);
+	for (int i=0; i<4; i++) CreateBox(x+13, y+2+i*3, " ", 27);
 	gotoxy(x+3, y+14); cout<<"HOAN THANH:";
 };
