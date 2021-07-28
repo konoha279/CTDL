@@ -32,6 +32,7 @@
 #define PAGE_DOWN 81
 #define LEFT_CLICK 0x5A
 #define RIGHT_CLICK 0x58
+#define DEL 127
 // thay unsigned int thanh uint
 typedef unsigned int uint;
 // ma mau

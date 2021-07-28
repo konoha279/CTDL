@@ -131,10 +131,13 @@ void NhanVienTable(int x, int y, const ListNhanVien &list, int page){
 };
 int NhanVienMenu(){
 	ListNhanVien list; list.n=0;
-	if(readFileNV(list, DEFAULT_NVFILE)) cout<<"\nLoi doc file";
+	if(!readFileNV(list, DEFAULT_NVFILE)) {
+		string tb = "LOI DOC FILE!";
+		thongbao((MAXLINE-tb.length())/2, MAXROW/2+2, "CANH BAO", tb, tb.length(), YELLOW, RED);
+		return 0;
+	}
 	quicksort(list, 0, list.n - 1, 0);
 	char c;
-	string str;
 	int line = 0, page = 1;
 	int y = YTABLE + 2, x = XTABLE+17;
 	NhanVienView(list, page);

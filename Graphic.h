@@ -7,8 +7,7 @@
 #include <thread>
 #include <iomanip>
 #include <vector>
-#include "NhanVien.h"
-#include "VatTu.h"
+#include "ThongKe.h"
 #include "mylib2.h"
 #include "ChuanHoa.h"
 #define LOGO  "logo.txt"
@@ -21,13 +20,13 @@
 #define YTABLE 5
 #define YTABLE2 22
 #define XTABLE 1
-#define VTTABLELENGTH 87
+#define VTTABLELENGTH 91
 #define VTFORMLENGTH 66
 using namespace std;
 string mainbutton[] = {"VATTU", "NHAN VIEN", "HOA DON", "THONGKE", "THOAT"};
 int mainbuttonn = 5;
-string buttomButton[] = {"ESC", "CTRL+F", "CTRL+N", "ENTER", "CTRL+S", "CTRL+V", "CTRL+L", "PAGE", "CTRL+P"};
-string buttomCommand[] = {"QUAY LAI", "TIM KIEM", "THEM MOI", "CHON", 
+string buttomButton[] = {"ESC", "CTRL+F", "CTRL+N", "ENTER", "DELETE", "CTRL+S", "CTRL+V", "CTRL+L", "PAGE", "CTRL+P"};
+string buttomCommand[] = {"QUAY LAI", "TIM KIEM", "THEM MOI", "CHON", "XOA", 
 					"SAVE FILE", "SAP XEP", "LOAD FILE","TRANG", "XUAT HOA DON"};
 int buttomCommandn = 9;
 //=====Ten Ham=====//
@@ -207,6 +206,46 @@ void thongbao(int x, int y, string title, string tb, int length, int color, int 
 		gotoxy(x, y-1+i);
 		cout<<" "<<setw(length+3)<<setfill(' ')<<" ";
 	}
+};
+void thongbao(int x, int y, string title, string tb[], int n, int length, int color, int BGcolor){
+    int maxlength = tb[0].length();
+    int i;
+    for (i=1; i<n; i++)
+        if(maxlength<tb[i].length()) maxlength = tb[i].length();
+    
+    if (length<maxlength||x<0||y<1) return;
+    //xoa vung
+    for (i=0; i<n+3; i++){
+        gotoxy(x, y-1+i);
+        cout<<" "<<setw(length+3)<<setfill(' ')<<" ";
+    }
+    //xet mau
+    SetBGColor(BGcolor);
+    SetColor(color);
+    //ve o
+    gotoxy(x,y-1);
+    cout << char(201) << setw(length+3) << setfill(char(205)) << char(187);
+    for (i=0; i<n+1; i++){
+        gotoxy(x, y+i);
+        cout << char(186) << " " << setw(length+2) << setfill(' ') << char(186);
+    }
+    gotoxy(x, y+n+1);
+    cout << char(200) << setw(length+3) << setfill(char(205)) << char(188);
+    //in chu
+    gotoxy(x+1 + (length-title.length())/2, y); cout<<title;
+    for (i=0; i<n; i++){
+        gotoxy(x+1 + (length-tb[i].length())/2, y+1+i); cout<<tb[i];
+    }
+    //bat phim, xet mau lai nhu cu, xoa vung
+    Cursor(true, 1);
+    _getch();
+    Cursor(false, 100);
+    SetBGColor(BLACK);
+    SetColor(WHITE);
+    for (i=0; i<n+3; i++){
+        gotoxy(x, y-1+i);
+        cout<<" "<<setw(length+3)<<setfill(' ')<<" ";
+    }
 };
 int luachon(int x, int y, string tb, int length){
 	if (length<tb.length()||x<0||y<1) return 0;
