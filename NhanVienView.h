@@ -23,16 +23,14 @@ void NhanVienView(const ListNhanVien &list, int page);
 //bang nhanvien
 void NhanVienTable(int x, int y, const ListNhanVien &list, int page);
 //menu cua nhan vien
-int NhanVienMenu();
+int NhanVienMenu(ListNhanVien &list);
 //FormNhanVien
 void NhanVienForm(int x, int y);
 //Tinh nang them NhanVien
-void addNhanVienForm(int x, int y, ListNhanVien& list, int page);
+int addNhanVienForm(int x, int y, ListNhanVien& list, ListNhanVien& listview, int page);
 //Tinh nang sua NhanVien
-void editNhanVienForm(int xform, int yform, ListNhanVien& list, int page, int xtable, int ytable, int tline);
+int editNhanVienForm(int xform, int yform, ListNhanVien& list, ListNhanVien& listview, int page, int xtable, int ytable, int tline);
 int getMaNVfromTable(int x, int y, int line);
-//Tim kiem
-void timkiem(ListNhanVien &list);
 //=====Noi dung=====//
 void NhanVienView(const ListNhanVien &list, int page){
 	clrscr();
@@ -129,20 +127,15 @@ void NhanVienTable(int x, int y, const ListNhanVien &list, int page){
 		if(list.nhanViens[i+index]->phai) cout<<"NU"; else cout<<"NAM";
 	}
 };
-int NhanVienMenu(){
-	ListNhanVien list; list.n=0;
-	if(readFileNV(list, DEFAULT_NVFILE)) {
-		string tb = "LOI DOC FILE!";
-		thongbao((MAXLINE-tb.length())/2, MAXROW/2+2, "CANH BAO", tb, tb.length(), YELLOW, RED);
-		return 0;
-	}
-	quicksort(list, 0, list.n - 1, 0);
+int NhanVienMenu(ListNhanVien &list){
+	ListNhanVien listview = copyList(list);
 	char c;
 	int line = 0, page = 1;
 	int y = YTABLE + 2, x = XTABLE+17;
-	NhanVienView(list, page);
+	NhanVienView(listview, page);
 	highlight(x, y, NVTABLELENGTH, YELLOW);
 	while (true){
+		Cursor(false, 100);
 		SetBGColor(BLACK);
 		gotoxy(155,42); cout<<"line: "<<line;
 		gotoxy(155,43); cout<<"page: "<<page;
@@ -157,7 +150,7 @@ int NhanVienMenu(){
 				continue;
 			}
 			case KEY_DOWN:{
-				if (line == 29 || line == list.n) continue;
+				if (line == 29 || line + (page-1)*30 == listview.n-1) continue;
 				y = YTABLE + 2 + line;
 				highlight(x, y, NVTABLELENGTH, BLACK);
 				highlight(x, y+1, NVTABLELENGTH, YELLOW);
@@ -166,11 +159,11 @@ int NhanVienMenu(){
 			}
 			case PAGE_DOWN:{
 				int n;
-				if(list.n%MAXTABLEROW==0) n=list.n/MAXTABLEROW;
-				else n=list.n/MAXTABLEROW+1;
+				if(list.n%MAXTABLEROW==0) n=listview.n/MAXTABLEROW;
+				else n=listview.n/MAXTABLEROW+1;
 				if (page+1>n) continue;
 				page++;
-				NhanVienTable(XTABLE + 16, YTABLE, list, page);
+				NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 				line = 0;
 				highlight(x, y, NVTABLELENGTH, BLACK);
 				y = YTABLE + 2;
@@ -180,7 +173,7 @@ int NhanVienMenu(){
 			case PAGE_UP:{
 				if(page==1) continue;
 				page--;
-				NhanVienTable(XTABLE + 16, YTABLE, list, page);
+				NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 				highlight(x, y, NVTABLELENGTH, BLACK);
 				y = YTABLE + 2; line = 0;
 				highlight(x, y, NVTABLELENGTH, YELLOW);
@@ -188,16 +181,23 @@ int NhanVienMenu(){
 			}
 			case ENTER: {
 				highlight(x, y, NVTABLELENGTH, BLACK);
-				editNhanVienForm(XTABLE + 16 + NVFORMLENGTH + 2, YTABLE2,list,page,XTABLE + 17, YTABLE + 2,line);
-				NhanVienTable(XTABLE + 16, YTABLE, list, page);
+				if(editNhanVienForm(XTABLE + 16 + NVFORMLENGTH + 2, YTABLE2, list, listview, page,
+				XTABLE + 17, YTABLE + 2,line)==1){
+					free(listview);
+					listview = copyList(list);
+				}
+				NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 				y = YTABLE + 2; line = 0;
 				highlight(x, y, NVTABLELENGTH, YELLOW);
 				continue;
 			}
 			case CTRL_N:{
 				highlight(x, y, NVTABLELENGTH, BLACK);
-				addNhanVienForm(XTABLE + 16 + NVFORMLENGTH + 2, YTABLE2, list, page);
-				NhanVienTable(XTABLE + 16, YTABLE, list, page);
+				if(addNhanVienForm(XTABLE + 16 + NVFORMLENGTH + 2, YTABLE2, list, listview, page)==1){
+					free(listview);
+					listview = copyList(list);
+				}
+				NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 				y = YTABLE + 2; line = 0;
 				highlight(x, y, NVTABLELENGTH, YELLOW);
 				continue;
@@ -205,21 +205,38 @@ int NhanVienMenu(){
 			case ESC: {
 				if (luachon(XTABLE + NVTABLELENGTH + 18, MAXROW-5, 
 				"Neu thoat du lieu cua ban se khong duoc luu lai. Ban chac chan muon thoat?",80)==1) return 1;
-				NhanVienTable(XTABLE + 16, YTABLE, list, page); 
+				NhanVienTable(XTABLE + 16, YTABLE, listview, page);
+				highlight(x, y, NVTABLELENGTH, YELLOW);
 				continue;
 			}
 			case CTRL_V:{
-				list.sort = (list.sort+1)%2;
-				quicksort(list,0,list.n-1,list.sort);
+				listview.sort = (listview.sort+1)%2;
+				quicksort(listview,0,listview.n-1,listview.sort);
 				highlight(x, y, NVTABLELENGTH, BLACK);
 				page=1; line=0;
-				y = YTABLE + 2; x = XTABLE+17;
-				NhanVienTable(XTABLE + 16, YTABLE, list, page);
+				y = YTABLE + 2;
+				NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 				highlight(x, y, NVTABLELENGTH, YELLOW);
+				continue;
 			}
 			case CTRL_F:{
-				timkiem(list);
-				NhanVienTable(XTABLE + 16, YTABLE, list, page);
+				string str = searchBox(XTABLE+17, YTABLE+6, NVFORMLENGTH-3, "TIM KIEM");
+				if (str=="") {
+					free(listview);
+					listview = copyList(list);
+				} else{
+					listview = search(list, str);
+					if (listview.n==0) {
+						thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "CANH BAO",
+						"KHONG NHAN VIEN NAO DUOC TIM THAY", NVFORMLENGTH-2, YELLOW, RED);
+						free(listview);
+						listview = copyList(list);
+					}
+				}
+				NhanVienTable(XTABLE + 16, YTABLE, listview, page);
+				page=1; line=0;
+				y = YTABLE + 2;
+				highlight(x, y, NVTABLELENGTH, YELLOW);
 				continue;
 			}
 			case CTRL_S:{
@@ -227,23 +244,53 @@ int NhanVienMenu(){
 				"Neu save file, du lieu hien tai khong the sua, ban chac chan muon save file?", 80)==1)
 					if (writeFileNV(list, DEFAULT_NVFILE)==1)
 						thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "THANH CONG",
-							"FILE DA DUOC SAVE!", NVFORMLENGTH-2, YELLOW, LIGHT_GREEN);
+							"FILE DA DUOC SAVE!", NVFORMLENGTH-2, BLUE, LIGHT_GREEN);
 					else thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "THAT BAI",
-							"SAVE FILE THAT BAI!", NVFORMLENGTH-2, YELLOW, LIGHT_RED);
-				NhanVienTable(XTABLE + 16, YTABLE, list, page);
+							"SAVE FILE THAT BAI!", NVFORMLENGTH-2, YELLOW, RED);
+				NhanVienTable(XTABLE + 16, YTABLE, listview, page);
+				highlight(x, y, NVTABLELENGTH, YELLOW);
 				continue;
 			}
 			case CTRL_L:{
 				if(luachon(XTABLE + NVTABLELENGTH + 15, MAXROW-5,
 				"Neu load file, du lieu hien tai se mat, ban chac chan muon save file?", 80)==1){
 					free(list);
-					if (readFileNV(list, DEFAULT_NVFILE)==1)
+					if (readFileNV(list, DEFAULT_NVFILE)==1){
 						thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "THANH CONG",
-							"FILE DA DUOC SAVE!", NVFORMLENGTH-2, YELLOW, LIGHT_GREEN);
+						"FILE DA DUOC SAVE!", NVFORMLENGTH-2, BLUE, LIGHT_GREEN);
+						free(listview);
+						listview = copyList(list);
+					}	
 					else thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "THAT BAI",
-							"SAVE FILE THAT BAI!", NVFORMLENGTH-2, YELLOW, LIGHT_RED);
+							"SAVE FILE THAT BAI! HAY KIEM TRA LAI", NVFORMLENGTH-2, YELLOW, RED);
 				}
-				NhanVienTable(XTABLE + 16, YTABLE, list, page);
+				page=1; line=0;
+				y = YTABLE + 2;
+				NhanVienTable(XTABLE + 16, YTABLE, listview, page);
+				highlight(x, y, NVTABLELENGTH, YELLOW);
+				continue;
+			}
+			case BACKSPACE:{
+				int manv = getMaNVfromTable(XTABLE + 17, YTABLE + 2, line);
+				NhanVien nv = get(list, manv);
+				if(nv.hoaDons->n>0)
+					thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "CANH BAO",
+					"NHAN VIEN NAY DA LAP HOA DON, KHONG THE XOA!", NVFORMLENGTH-2, YELLOW, RED);
+				else if (luachon(XTABLE + NVTABLELENGTH + 15, MAXROW-5, 
+					"BAN THAT SU MUON XOA NHAN VIEN NAY?", NVFORMLENGTH-2)==1)
+					if(remove(list, manv)!=1)
+						thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "THAT BAI",
+						"NHAN VIEN CHUA DUOC XOA, HAY KIEM TRA LAI!", NVFORMLENGTH-2, YELLOW, RED);
+					else {
+						thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "THANH CONG",
+						"NHAN VIEN DA DUOC XOA!", NVFORMLENGTH-2, BLUE, LIGHT_GREEN);
+						free(listview);
+						listview = copyList(list);
+					}
+				page=1; line=0;
+				y = YTABLE + 2;
+				NhanVienTable(XTABLE + 16, YTABLE, listview, page);
+				highlight(x, y, NVTABLELENGTH, YELLOW);
 				continue;
 			}
 		}
@@ -278,12 +325,12 @@ void NhanVienForm(int x, int y){
 	for (int i=0; i<4; i++) CreateBox(x+15, y+2+i*3, " ", MAX_HO+2);
 	gotoxy(x+5, y+14); cout<<"HOAN THANH:";
 };
-void addNhanVienForm(int defaultx, int defaulty, ListNhanVien& list, int page){
+int addNhanVienForm(int defaultx, int defaulty, ListNhanVien& list, ListNhanVien& listview, int page){
 	char c;
 	int line = 1;
 	//Lay toa do o thu nhat
 	int x = defaultx + 17, y = defaulty + 2;
-	gotoxy(x, y); cout<<list.n;
+	gotoxy(x, y); cout<<list.nhanViens[list.n-1]->maNV+1;
 	while (true){
 		//debug
 		gotoxy(135, 43); cout<<"x:"<<x;  gotoxy(141, 43); cout<<"y:"<<y; gotoxy(146, 43); cout<<"list.n:"<<list.n;
@@ -320,17 +367,17 @@ void addNhanVienForm(int defaultx, int defaulty, ListNhanVien& list, int page){
 				}
 				case PAGE_DOWN:{
 					int n;
-					if(list.n%MAXTABLEROW==0) n=list.n/MAXTABLEROW;
-					else n=list.n/MAXTABLEROW+1;
+					if(listview.n%MAXTABLEROW==0) n=listview.n/MAXTABLEROW;
+					else n=listview.n/MAXTABLEROW+1;
 					if (page+1>n) continue;
 					page++;
-					NhanVienTable(XTABLE + 16, YTABLE, list, page);
+					NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 					continue;
 				}
 				case PAGE_UP:{
 					if(page==1) continue;
 					page--;
-					NhanVienTable(XTABLE + 16, YTABLE, list, page);
+					NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 					continue;
 				}
 			}
@@ -344,7 +391,7 @@ void addNhanVienForm(int defaultx, int defaulty, ListNhanVien& list, int page){
 				}
 				case ESC: {
 					NhanVienForm (defaultx+1, defaulty);
-					return;
+					return 0;
 				}
 				case ENTER: {
 					if (line==5) {
@@ -356,21 +403,21 @@ void addNhanVienForm(int defaultx, int defaulty, ListNhanVien& list, int page){
 						if (indexOf(list, 0, list.n-1, maNV)>-1) {
 							thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "CANH BAO",
 							"TRUNG MA NHAN VIEN!", NVFORMLENGTH-2, YELLOW, LIGHT_RED);
-							NhanVienTable(XTABLE + 16, YTABLE, list, page);
+							NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 							continue;
 						}
 						for (i=0; i<32; i++) ho+=readChar(xx+i,yy+3); trim(ho);
 						if (!ho.length()) {
 							thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "CANH BAO",
 							"KHONG DUOC DE TRONG HO!", NVFORMLENGTH-2, BLUE, LIGHT_GREEN);
-							NhanVienTable(XTABLE + 16, YTABLE, list, page);
+							NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 							continue;
 						} 
 						for (i=0; i<32; i++) ten+=readChar(xx+i,yy+6); trim(ten);
 						if (!ten.length()) {
 							thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "CANH BAO",
 							"KHONG DUOC DE TRONG TEN!", NVFORMLENGTH-2, BLUE, LIGHT_GREEN);
-							NhanVienTable(XTABLE + 16, YTABLE, list, page);
+							NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 							continue;
 						}
 						for (i=0; i<32; i++) phai+=readChar(xx+i, yy+9); trim(phai);
@@ -379,7 +426,7 @@ void addNhanVienForm(int defaultx, int defaulty, ListNhanVien& list, int page){
 						else {
 							thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "CANH BAO",
 							"PHAI NHAP SAI DINH DANG!", NVFORMLENGTH-2, BLUE, LIGHT_GREEN);
-							NhanVienTable(XTABLE + 16, YTABLE, list, page);
+							NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 							continue;
 						}
 						NhanVien nv = createNhanVien(maNV, ho, ten, i);
@@ -387,12 +434,12 @@ void addNhanVienForm(int defaultx, int defaulty, ListNhanVien& list, int page){
 							thongbao (XTABLE + NVTABLELENGTH + 15, MAXROW-5, "THONG BAO",
 							"THEM NHAN VIEN THANH CONG!", NVFORMLENGTH-2, BLUE, LIGHT_GREEN);
 							NhanVienForm (defaultx+1, defaulty);
-							return;
+							return 1;
 						}
 						else {
 							thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "THONG BAO",
 							"THEM NHAN VIEN THAT BAI!", NVFORMLENGTH-2, YELLOW, LIGHT_RED);
-							NhanVienTable(XTABLE + 16, YTABLE, list, page);
+							NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 							continue;
 						}
 					}
@@ -401,24 +448,24 @@ void addNhanVienForm(int defaultx, int defaulty, ListNhanVien& list, int page){
 				default:{
 					switch (line){
 						case 1:{
-							if(isNumber(c)){
+							if(isNumber(c)&&x<defaultx + 17 + 32){
 								cout<<c; x++;
 							} else {
 								thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "CANH BAO",
 								"KHONG CHI NHAP SO!", NVFORMLENGTH-2, YELLOW, RED);
-								NhanVienTable(XTABLE + 16, YTABLE, list, page);
+								NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 							}
 							continue;
 						}
 						case 2:
 						case 3:
 						case 4:{
-							if(!isBlackchar(c)) {
+							if(!isBlackchar(c)&&x<defaultx + 17 + 32) {
 								cout<<char(toupper(c)); x++;	
 							} else {
 								thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "CANH BAO",
 								"KI TU VUA NHAP KHONG DUOC CHO PHEP!", NVFORMLENGTH-2, YELLOW, RED);
-								NhanVienTable(XTABLE + 16, YTABLE, list, page);
+								NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 							}
 							continue;
 						}
@@ -438,7 +485,7 @@ int getMaNVfromTable(int x, int y, int line){
 	}
 	return atoi(str.c_str());
 };
-void editNhanVienForm(int xform, int yform, ListNhanVien& list, int page, int xtable, int ytable, int tline){
+int editNhanVienForm(int xform, int yform, ListNhanVien& list, ListNhanVien& listview, int page, int xtable, int ytable, int tline){
 	int manv = getMaNVfromTable(xtable, ytable, tline);
 	gotoxy(135, 44); cout<<"manv:"<<manv;
 	NhanVien nv = get(list, manv);
@@ -487,17 +534,17 @@ void editNhanVienForm(int xform, int yform, ListNhanVien& list, int page, int xt
 				}
 				case PAGE_DOWN:{
 					int n;
-					if(list.n%MAXTABLEROW==0) n=list.n/MAXTABLEROW;
-					else n=list.n/MAXTABLEROW+1;
+					if(listview.n%MAXTABLEROW==0) n=listview.n/MAXTABLEROW;
+					else n=listview.n/MAXTABLEROW+1;
 					if (page+1>n) continue;
 					page++;
-					NhanVienTable(XTABLE + 16, YTABLE, list, page);
+					NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 					continue;
 				}
 				case PAGE_UP:{
 					if(page==1) continue;
 					page--;
-					NhanVienTable(XTABLE + 16, YTABLE, list, page);
+					NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 					continue;
 				}
 			}
@@ -511,7 +558,7 @@ void editNhanVienForm(int xform, int yform, ListNhanVien& list, int page, int xt
 				}
 				case ESC: {
 					NhanVienForm (xform+1, yform);
-					return;
+					return 0;
 				}
 				case ENTER: {
 					if (line==5) {
@@ -524,14 +571,14 @@ void editNhanVienForm(int xform, int yform, ListNhanVien& list, int page, int xt
 						if (!ho.length()) {
 							thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "CANH BAO",
 							"KHONG DUOC DE TRONG HO!", NVFORMLENGTH-2, BLUE, LIGHT_GREEN);
-							NhanVienTable(XTABLE + 16, YTABLE, list, page);
+							NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 							continue;
 						} 
 						for (i=0; i<32; i++) ten+=readChar(xx+i,yy+6); trim(ten);
 						if (!ten.length()) {
 							thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "CANH BAO",
 							"KHONG DUOC DE TRONG TEN!", NVFORMLENGTH-2, BLUE, LIGHT_GREEN);
-							NhanVienTable(XTABLE + 16, YTABLE, list, page);
+							NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 							continue;
 						}
 						for (i=0; i<32; i++) phai+=readChar(xx+i, yy+9); trim(phai);
@@ -540,7 +587,7 @@ void editNhanVienForm(int xform, int yform, ListNhanVien& list, int page, int xt
 						else {
 							thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "CANH BAO",
 							"PHAI NHAP SAI DINH DANG!", NVFORMLENGTH-2, BLUE, LIGHT_GREEN);
-							NhanVienTable(XTABLE + 16, YTABLE, list, page);
+							NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 							continue;
 						}
 						NhanVien nv = createNhanVien(maNV, ho, ten, i);
@@ -548,12 +595,12 @@ void editNhanVienForm(int xform, int yform, ListNhanVien& list, int page, int xt
 							thongbao (XTABLE + NVTABLELENGTH + 15, MAXROW-5, "THONG BAO",
 							"CHINH SUA NHAN VIEN THANH CONG!", NVFORMLENGTH-2, BLUE, LIGHT_GREEN);
 							NhanVienForm (xform+1, yform);
-							return;
+							return 1;
 						}
 						else {
 							thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "THONG BAO",
 							"CHINH SUA NHAN VIEN THAT BAI!", NVFORMLENGTH-2, YELLOW, LIGHT_RED);
-							NhanVienTable(XTABLE + 16, YTABLE, list, page);
+							NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 							continue;
 						}
 					}
@@ -564,12 +611,12 @@ void editNhanVienForm(int xform, int yform, ListNhanVien& list, int page, int xt
 						case 2:
 						case 3:
 						case 4:{
-							if(!isBlackchar(c)) {
+							if(!isBlackchar(c)&&x<xform + 17 + 32) {
 								cout<<char(toupper(c)); x++;	
 							} else {
 								thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "CANH BAO",
 								"KI TU VUA NHAP KHONG DUOC CHO PHEP!", NVFORMLENGTH-2, YELLOW, RED);
-								NhanVienTable(XTABLE + 16, YTABLE, list, page);
+								NhanVienTable(XTABLE + 16, YTABLE, listview, page);
 							}
 							continue;
 						}
@@ -578,84 +625,5 @@ void editNhanVienForm(int xform, int yform, ListNhanVien& list, int page, int xt
 					continue;
 				}
 			}
-	}
-};
-void timkiem(ListNhanVien &list){
-	ListNhanVien list2 = search(list, searchBox(XTABLE+17, YTABLE+6, NVFORMLENGTH-3, "TIM KIEM"));
-	char c;
-	int line = 0, page = 1;
-	int y = YTABLE + 2, x = XTABLE+17;
-	NhanVienTable(XTABLE + 16, YTABLE, list2, page);
-	highlight(x, y, NVTABLELENGTH, YELLOW);
-	while (true){
-		SetBGColor(BLACK);
-		gotoxy(155,42); cout<<"line: "<<line;
-		gotoxy(155,43); cout<<"page: "<<page;
-		c=_getch();
-		switch(c){
-			case KEY_UP:{
-				if (line == 0) continue;
-				y = YTABLE + 2 + line;
-				highlight(x, y, NVTABLELENGTH, BLACK);
-				highlight(x, y-1, NVTABLELENGTH, YELLOW);
-				line--;
-				continue;
-			}
-			case KEY_DOWN:{
-				if (line == 29 || line == list.n) continue;
-				y = YTABLE + 2 + line;
-				highlight(x, y, NVTABLELENGTH, BLACK);
-				highlight(x, y+1, NVTABLELENGTH, YELLOW);
-				line++;
-				continue;
-			}
-			case PAGE_DOWN:{
-				int n;
-				if(list2.n%MAXTABLEROW==0) n=list2.n/MAXTABLEROW;
-				else n=list2.n/MAXTABLEROW+1;
-				if (page+1>n) continue;
-				page++;
-				NhanVienTable(XTABLE + 16, YTABLE, list2, page);
-				line = 0;
-				highlight(x, y, NVTABLELENGTH, BLACK);
-				y = YTABLE + 2;
-				highlight(x, y, NVTABLELENGTH, YELLOW);
-				continue;
-			}
-			case PAGE_UP:{
-				if(page==1) continue;
-				page--;
-				NhanVienTable(XTABLE + 16, YTABLE, list2, page);
-				highlight(x, y, NVTABLELENGTH, BLACK);
-				y = YTABLE + 2; line = 0;
-				highlight(x, y, NVTABLELENGTH, YELLOW);
-				continue;
-			}
-			case ENTER: {
-				highlight(x, y, NVTABLELENGTH, BLACK);
-				editNhanVienForm(XTABLE + 16 + NVFORMLENGTH + 2, YTABLE2,list,page,XTABLE + 17, YTABLE + 2,line);
-				return;
-			}
-			case CTRL_N:{
-				highlight(x, y, NVTABLELENGTH, BLACK);
-				addNhanVienForm(XTABLE + 16 + NVFORMLENGTH + 2, YTABLE2, list, page);
-				return;
-			}
-			case ESC: return;
-			case CTRL_V:{
-				list2.sort = (list2.sort+1)%2;
-				quicksort(list2,0,list2.n-1,list2.sort);
-				highlight(x, y, NVTABLELENGTH, BLACK);
-				page=1; line=0;
-				y = YTABLE + 2; x = XTABLE+17;
-				NhanVienTable(XTABLE + 16, YTABLE, list2, page);
-				highlight(x, y, NVTABLELENGTH, YELLOW);
-			}
-			case CTRL_F:{
-				thongbao(XTABLE + NVTABLELENGTH + 15, MAXROW-5, "THONG BAO",
-				"VUI LONG ESC DE THOAT KHOI CHE DO TIM KIEM TRUOC!", NVFORMLENGTH-2, RED, LIGHT_YELLOW);
-				continue;
-			}
-		}
 	}
 };
